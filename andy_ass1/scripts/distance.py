@@ -4,6 +4,8 @@ from std_msgs.msg import String
 from sensor_msgs.msg import LaserScan
 import json
 
+#
+
 class Distance:
     """
     A very simple Roamer implementation for Thorvald.
