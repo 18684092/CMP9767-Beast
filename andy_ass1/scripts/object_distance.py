@@ -32,8 +32,8 @@ class Distance:
         Callback called any time a new laser scan becomes available
         """
         self.activeB = True
-        self.distance_back['back'] = min(data.ranges[595:600])
-        self.distance_back['left']= min(data.ranges[80:90])
+        self.distance_back['back'] = min(data.ranges[450:600])
+        self.distance_back['left']= min(data.ranges[100:250])
         self.distance_back['right'] = min(data.ranges[710:719]) -1.25
         self.distance_back['front'] = min(data.ranges[0:3]) - 1.5
 
@@ -44,8 +44,8 @@ class Distance:
         self.activeF = True
         self.distance_front['back'] = min(data.ranges[0:3]) - 1.5
         self.distance_front['left']= min(data.ranges[710:719]) - 1.25
-        self.distance_front['right'] = min(data.ranges[220:230])
-        self.distance_front['front'] = min(data.ranges[490:500])
+        self.distance_front['right'] = min(data.ranges[220:250])
+        self.distance_front['front'] = min(data.ranges[450:500])
 
     def pub(self):
         if self.activeF and self.activeB:
