@@ -161,6 +161,7 @@ include_directories(
  catkin_install_python(PROGRAMS
    scripts/object_distance.py
    scripts/open_move.py
+   scripts/control.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
  )
 
