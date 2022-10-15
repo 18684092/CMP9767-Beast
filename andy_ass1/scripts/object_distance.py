@@ -14,8 +14,8 @@ class Distance:
     def __init__(self):
         """
         On construction of the object, create a Subscriber
-        to listen to lasr scans and a Publisher to control
-        the robot
+        to listen to laser scans and publish the distance of an
+        object around the robot
         """
 
         self.distance_back = {}
@@ -32,8 +32,8 @@ class Distance:
         Callback called any time a new laser scan becomes available
         """
         self.activeB = True
-        self.distance_back['back'] = min(data.ranges[595:600])
-        self.distance_back['left']= min(data.ranges[80:90])
+        self.distance_back['back'] = min(data.ranges[450:600])
+        self.distance_back['left']= min(data.ranges[100:250])
         self.distance_back['right'] = min(data.ranges[710:719]) -1.25
         self.distance_back['front'] = min(data.ranges[0:3]) - 1.5
 
@@ -42,10 +42,10 @@ class Distance:
         Callback called any time a new laser scan becomes available
         """
         self.activeF = True
-        self.distance_front['back'] = min(data.ranges[0:3]) - 1.5
+        self.distance_front['back'] = min(data.ranges[0:2]) - 1.5
         self.distance_front['left']= min(data.ranges[710:719]) - 1.25
-        self.distance_front['right'] = min(data.ranges[220:230])
-        self.distance_front['front'] = min(data.ranges[490:500])
+        self.distance_front['right'] = min(data.ranges[220:250])
+        self.distance_front['front'] = min(data.ranges[450:500])
 
     def pub(self):
         if self.activeF and self.activeB:
@@ -56,12 +56,15 @@ class Distance:
             d_str = json.dumps(self.distance)
             self.publisher.publish(d_str)
 
-if __name__ == '__main__':
-    rospy.init_node('get_distance')
-    distance = Distance()
+def main():
+    rospy.init_node('object_distance')
+    distanceToObject = Distance()
     rate = rospy.Rate(5)
     while not rospy.is_shutdown():
-        distance.pub()
+        distanceToObject.pub()
         rate.sleep()
+
+if __name__ == '__main__':
+    main()
         
 
