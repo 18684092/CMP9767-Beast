@@ -14,8 +14,7 @@ class OpenMove:
         self.od = {}
         self.direction = 'fwd'
         self.distance = distance
-        self.speed = speed
-        self.state = 'go'
+        self.maxSpeed = speed
         self.active = False
         self.publisher = rospy.Publisher('/thorvald_001/teleop_joy/cmd_vel', Twist, queue_size=1)
         rospy.Subscriber("/thorvald_001/object_distance", String, self.callback)
@@ -27,25 +26,20 @@ class OpenMove:
         self.od = json.loads(s)
         self.active = True
 
-        
-
     def pub(self, cmd):
         if not self.active: return
-        self.state = 'go'
         self.publisher.publish(cmd)
         
 
     def decision(self):
         if not self.active: return
-        print(self.od[self.cmdMap[self.direction]])
-        if self.od[self.cmdMap[self.direction]] < self.distance * 4:
-            self.pub(self.makeCmd('slow'))
+
         if self.od[self.cmdMap[self.direction]] < self.distance :
-            self.pub(self.makeCmd('stop'))
+            self.stop()
             self.chooseRndDir()
-            self.pub(self.makeCmd('normal'))
+            self.pub(self.makeCmd())
         else:
-            self.pub(self.makeCmd('normal'))
+            self.pub(self.makeCmd())
         
 
     def chooseRndDir(self):
@@ -55,41 +49,42 @@ class OpenMove:
             if key != self.direction:
                 newDir.append(key)
         self.direction = newDir[random.randint(0, len(newDir)-1)]
-        print(self.direction)
         
-
     def makeCmd(self, speed = 'normal'):
-        x = 0.0
-        y = 0.0
-        z = 0.0
-        fwdSpeed = self.speed
-        if speed == 'slow':
-            fwdSpeed /= 4
+        x, y, z = 0.0, 0.0, 0.0
         t = Twist()
+        fwdSpeed = self.maxSpeed
+
+        if self.od['nearest'] < self.distance :
+            fwdSpeed = self.od['nearest'] / self.distance
+            if fwdSpeed > self.maxSpeed:
+                fwdSpeed = self.maxSpeed
+            if fwdSpeed < 0.3:
+                fwdSpeed = 0.3
+
+        
         if speed == 'stop':
             self.state = 'stop'
-        if self.state == 'stop':
             x, y, z = 0.0, 0.0, 0.0
-        elif self.direction == 'fwd':
-            x = fwdSpeed
+            return t
+        
+        if self.direction == 'fwd':
+            t.linear.x = fwdSpeed
         elif self.direction == 'rev':
-            x = -fwdSpeed
+            t.linear.x = -fwdSpeed
         elif self.direction == 'lft':
-            y = fwdSpeed
+            t.linear.y = fwdSpeed
         elif self.direction == 'rgt':
-            y = -fwdSpeed
-        t.linear.x = x
-        t.linear.y = y
-        t.angular.z = z
+            t.linear.y = -fwdSpeed
+
         return t
 
     def stop(self):
         self.pub(self.makeCmd('stop'))
 
-
 def main():
     rospy.init_node('open_mover')
-    move = OpenMove(1.5,1)
+    move = OpenMove(1,1)
     rate = rospy.Rate(5)
     while not rospy.is_shutdown():
         move.decision()
