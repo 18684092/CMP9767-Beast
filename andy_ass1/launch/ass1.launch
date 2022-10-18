@@ -1,0 +1,14 @@
+<launch>
+
+        <!-- Launch the simulator demo -->
+        <include file="$(find bacchus_gazebo)/launch/vineyard_demo.launch" />
+        
+        <!-- Publish aggregated object distance information around robot -->
+        <node pkg="andy_ass1" name="object_distance" type="object_distance.py" />
+               
+        <!-- Uses object distance to avoid obstacles and moves randomly -->
+        <node pkg="andy_ass1" name="open_mover" type="open_move.py" />
+
+
+        
+</launch>
