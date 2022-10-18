@@ -34,9 +34,9 @@ class OpenMove:
         
         # pid stuff
         # Taken from https://www.youtube.com/watch?v=gbMUOgJInYs
-        self.Kp = 0
-        self.Ki = 0
-        self.Kd = 0
+        self.Kp = 0.1
+        self.Ki = 0.01
+        self.Kd = 0.001
         self.previous_error = 0
         self.previous_integral = 0
         self.target = 0
@@ -67,9 +67,39 @@ class OpenMove:
     # pid #
     #######
     # Taken from https://www.youtube.com/watch?v=gbMUOgJInY
-    def pid(self, dir):
+    def pid(self):
+        t = 0.0
+        if self.direction == 'fwd' or self.direction == 'rev':
+            t = (self.positionX)
+        else:
+            t = (self.positionY)
+        error = self.target -t
+        integral = self.previous_integral + error
+        derivative = error - self.previous_error
+        z = self.Kp * error + self.Ki * integral + self.Kd * derivative
+        self.previous_error = error
+        self.previous_integral = integral
 
-        pass
+        print("z",z)
+        print("error:",error)
+        print("Current:", t)
+        print("Target:", self.target)
+
+        z = 0
+        return z
+
+    ################
+    # setPIDTarget #
+    ################
+    def setPIDTarget(self):
+        if self.direction == 'fwd' or self.direction == 'rev':
+            self.target = self.positionX
+        else:
+            self.target = self.positionY
+
+        self.previous_integral = 0.0
+        self.previous_error = 0.0
+        self.positionZ = 0.0
 
     ###############
     # pubDistance #
@@ -96,9 +126,11 @@ class OpenMove:
         self.positionX = data.position.y
         self.positionY = data.position.x
         self.positionZ = data.position.z
+        
         if not self.activeP:
             self.initialPosition = (self.positionX, self.positionY)
             self.positionAtTurn = (self.positionX, self.positionY)
+            self.setPIDTarget()
         self.activeP = True
 
     ###################
@@ -146,9 +178,8 @@ class OpenMove:
         if self.od[self.cmdMap[self.direction]] < self.distance :
             self.stop()
             self.chooseRndDir()
-            self.pub(self.makeCmd())
-        else:
-            self.pub(self.makeCmd())
+        self.pub(self.makeCmd())
+
         
     ################
     # chooseRndDir #
@@ -167,7 +198,8 @@ class OpenMove:
 
         # Mark position for distance calc
         self.positionAtTurn = (self.positionX, self.positionY)
-        
+        self.setPIDTarget()
+
     ###########
     # makeCmd #
     ###########
@@ -196,6 +228,9 @@ class OpenMove:
             t.linear.y = fwdSpeed
         elif self.direction == 'rgt':
             t.linear.y = -fwdSpeed
+
+        # turn with pid value
+        t.angular.z = self.pid()
 
         return t
 
