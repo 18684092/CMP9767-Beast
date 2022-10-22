@@ -162,6 +162,7 @@ include_directories(
    scripts/object_distance.py
    scripts/open_move.py
    scripts/control.py
+   scripts/mover_with_pose.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
  )
 
