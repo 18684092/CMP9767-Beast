@@ -12,7 +12,7 @@ from math import sqrt, sin, cos, degrees
 ############
 class Distance:
     """
-    A very simple object detection implementation for Thorvald.
+    An object detection publisher for Thorvald.
     """
 
     ########
@@ -22,26 +22,20 @@ class Distance:
         """
         On construction of the object, create a Subscriber
         to listen to laser scans and publish the distance of an
-        object around the robot
+        object closest to the robot
         """
-
-        self.distance_back = {'back':999, 'front':999, 'left':999, 'right':999, 'nearest':999}
-        self.distance_front = {'back':999, 'front':999, 'left':999, 'right':999, 'nearest': 999}
-        self.distance = {'back':999, 'front':999, 'left':999, 'right':999, 'nearest': 999}
-
         # We haven't received a reading yet - True when we have a laser scan
         self.activeB = False
         self.activeF = False
 
+        # There are two LiDARs
         self.poseF = PoseStamped()
         self.poseB = PoseStamped()
         
         self.listener = TransformListener()
-        self.publisher = rospy.Publisher('/thorvald_001/object_distance', String, queue_size=1)
-        self.pose_pub = rospy.Publisher(
-            '/nearest_obstacle',
-            PoseStamped,queue_size=1
-        )
+        
+        self.distancePub = rospy.Publisher('/thorvald_001/object_distance', String, queue_size=1)
+        self.posePub = rospy.Publisher('/nearest_obstacle', PoseStamped,queue_size=1)
         rospy.Subscriber("/thorvald_001/back_scan", LaserScan, self.callback_back)
         rospy.Subscriber("/thorvald_001/front_scan", LaserScan, self.callback_front)
 
@@ -52,15 +46,10 @@ class Distance:
         """
         Callback called any time a new laser scan becomes available
         """
-
-        # Used to control when to publish
-        self.activeB = True
-
-        (x, y, z), angle = self.getNearestCartesian(data)
         
-        self.poseB.header = data.header
-        self.poseB.pose.position = Point(x, y, z)
-        self.poseB.pose.orientation = Quaternion(0, 0, sin(angle/2), cos(angle/2))
+        self.activeB = True
+        (x, y, z), angle = self.getNearestCartesian(data)
+        self.poseB = self.makePose(x,y,z,angle,data)
 
     ##################
     # callback_front #
@@ -69,15 +58,21 @@ class Distance:
         '''
         Callback called any time a new laser scan becomes available
         '''
-
-        # Used to control when to publish
-        self.activeF = True
-
-        (x, y, z), angle = self.getNearestCartesian(data)
         
-        self.poseF.header = data.header
-        self.poseF.pose.position = Point(x, y, z)
-        self.poseF.pose.orientation = Quaternion(0, 0, sin(angle/2), cos(angle/2))
+        self.activeF = True
+        (x, y, z), angle = self.getNearestCartesian(data)
+        self.poseF = self.makePose(x,y,z,angle,data)        
+
+    ############
+    # makePose #
+    ############
+    def makePose(self, x, y, z, angle, data):
+        pose = PoseStamped()
+        pose.header = data.header
+        pose.pose.position = Point(x, y, z)
+        pose.pose.orientation = Quaternion(0, 0, sin(angle/2), cos(angle/2))
+        
+        return pose
 
     #######################
     # getNearestCartesian #
@@ -92,7 +87,6 @@ class Distance:
 
         return (self.cartesian(angle, min_distance)), angle
 
-
     #############
     # cartesian #
     #############
@@ -104,29 +98,32 @@ class Distance:
     # pub #
     #######
     def pub(self):
+        '''
+        Publishes the pose of the closest object from the one of the
+        LiDARs for RVIZ use. But only when both LiDARS have scanned.
+        '''
+        
         if not self.activeB or not self.activeF:
             return
+
+        # Which LiDAR sees closest object
         f = self.poseF.pose.position
         b = self.poseB.pose.position
-        fd = sqrt((f.x * f.x) + (f.y * f.y))
-        bd = sqrt((b.x * b.x) + (b.y * b.y))
-
+        fd = (f.x * f.x) + (f.y * f.y)
+        bd = (b.x * b.x) + (b.y * b.y)
         if fd <= bd:
             pose = self.poseF
         else:
             pose = self.poseB
 
-
-
         transformed_pose = self.listener.transformPose("thorvald_001/base_link", pose)
-        rospy.loginfo("The closest point in laser coords is at:\n%s" % pose)
-        rospy.loginfo("The closest point in robot coords is at:\n%s" % transformed_pose)
-        self.pose_pub.publish(pose)
+        self.posePub.publish(transformed_pose)
 
 ########
 # main #
 ########
 def main():
+    
     rospy.init_node('object_distance')
     distanceToObject = Distance()
     rate = rospy.Rate(10)
