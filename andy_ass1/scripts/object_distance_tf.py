@@ -31,6 +31,7 @@ class Distance:
         self.activeB = False
         self.activeF = False
         
+        self.listener = tf.TransformListener()
         self.publisher = rospy.Publisher('/thorvald_001/object_distance', String, queue_size=1)
         rospy.Subscriber("/thorvald_001/back_scan", LaserScan, self.callback_back)
         rospy.Subscriber("/thorvald_001/front_scan", LaserScan, self.callback_front)
@@ -43,43 +44,7 @@ class Distance:
         Callback called any time a new laser scan becomes available
         """
         self.activeB = True
-        # Forty-Five degrees rotated
-        # 0   Degrees = North
-        # 90  degrees = East
-        # 180 degrees = South
-        ff = 0.785398
-        inc = 0.006314325612038374
-        ang = 2.359999895095825 + ff
-        f = [999]
-        b = [999]
-        l = [999]
-        r = [999] 
 
-        # calculate all x,y distances
-        for index,value in enumerate(data.ranges):
-            # NOTE x and y have been rotated
-            x = sin(ang) * value
-            y = cos(ang) * value
-
-            angle = degrees(ang)
-            ang -= inc
-            if angle > -90 and angle < 90 and x > -1.45 and x < 0.4 and y > 0:
-                b.append(abs(y))
-            if angle < -79:
-                r.append(abs(value) - 1.25)
-            if y < 0 and y > -1.70  and x > 0:
-                l.append(abs(x))
-            if angle > 179:
-                f.append(abs(value) - 1.75)
-            if angle < 0.1 and angle > 0.1:
-                b.append(abs(y))
-                l.append(abs(x))
-           # print(index, angle, x, y, value)
-        
-        self.distance_back['front'] = min(f)
-        self.distance_back['right'] = min(r)
-        self.distance_back['back'] = min(b)
-        self.distance_back['left']= min(l)
 
     ##################
     # callback_front #
@@ -90,42 +55,20 @@ class Distance:
         """
 
         self.activeF = True
-   
-        # Forty-Five degrees rotated
-        # 0   Degrees = North
-        # 90  degrees = East
-        # 180 degrees = South
-        ff = 0.785398
-        inc = 0.006314325612038374
-        ang = 2.359999895095825 + ff
-        f = [999]
-        b = [999]
-        l = [999]
-        r = [999] 
- 
+
+        min_dist = min(data.ranges)
+        laser_point_2d = [] * len(data.ranges)
         for index,value in enumerate(data.ranges):
             # NOTE x and y have been rotated
             x = sin(ang) * value
             y = cos(ang) * value
 
-            angle = degrees(ang)
-            ang -= inc
-            if angle > -90 and angle < 90 and x > -1.45 and x < 0.4 and y > 0:
-                f.append(abs(y))
-            if angle < -79:
-                l.append(abs(value) - 1.25)
-            if y < 0 and y > -1.70  and x > 0:
-                r.append(abs(x))
-            if angle > 179:
-                b.append(abs(value) - 1.75)
-            if angle < 0.1 and angle > 0.1:
-                f.append(abs(y))
-                r.append(abs(x))
+            angle = data.angle_min + (index * data.angle_increment)
+
+            laser_point_2d[index] = [cos(angle) * value, sin(angle) * value, 0.0, angle]
         
-        self.distance_front['front'] = min(f)
-        self.distance_front['right'] = min(r)
-        self.distance_front['back'] = min(b)
-        self.distance_front['left']= min(l) 
+            print()
+
 
     #######
     # pub #
