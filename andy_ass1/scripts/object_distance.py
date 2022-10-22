@@ -31,9 +31,9 @@ class Distance:
         self.activeB = False
         self.activeF = False
         
-        self.publisher = rospy.Publisher('/thorvald_001/object_distance', String, queue_size=1)
-        rospy.Subscriber("/thorvald_001/back_scan", LaserScan, self.callback_back)
-        rospy.Subscriber("/thorvald_001/front_scan", LaserScan, self.callback_front)
+        self.publisher = rospy.Publisher('object_distance', String, queue_size=1)
+        rospy.Subscriber("back_scan", LaserScan, self.callback_back)
+        rospy.Subscriber("front_scan", LaserScan, self.callback_front)
 
     #################
     # callback_back #

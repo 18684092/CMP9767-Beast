@@ -34,10 +34,9 @@ class Distance:
         
         self.listener = TransformListener()
         
-        self.distancePub = rospy.Publisher('/thorvald_001/object_distance', String, queue_size=1)
-        self.posePub = rospy.Publisher('/nearest_obstacle', PoseStamped,queue_size=1)
-        rospy.Subscriber("/thorvald_001/back_scan", LaserScan, self.callback_back)
-        rospy.Subscriber("/thorvald_001/front_scan", LaserScan, self.callback_front)
+        self.posePub = rospy.Publisher('nearest_obstacle_pose', PoseStamped,queue_size=1)
+        rospy.Subscriber("back_scan", LaserScan, self.callback_back)
+        rospy.Subscriber("front_scan", LaserScan, self.callback_front)
 
     #################
     # callback_back #
@@ -124,7 +123,7 @@ class Distance:
 ########
 def main():
     
-    rospy.init_node('object_distance')
+    rospy.init_node('object_distance_tf')
     distanceToObject = Distance()
     rate = rospy.Rate(10)
     while not rospy.is_shutdown():
