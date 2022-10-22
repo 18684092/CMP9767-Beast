@@ -2,6 +2,8 @@
 import rospy
 from std_msgs.msg import String
 from sensor_msgs.msg import LaserScan
+from geometry_msgs.msg import PoseStamped, Point, Quaternion
+from tf import TransformListener
 import json
 from math import sqrt, sin, cos, degrees
 
@@ -30,9 +32,16 @@ class Distance:
         # We haven't received a reading yet - True when we have a laser scan
         self.activeB = False
         self.activeF = False
+
+        self.poseF = PoseStamped()
+        self.poseB = PoseStamped()
         
-        self.listener = tf.TransformListener()
+        self.listener = TransformListener()
         self.publisher = rospy.Publisher('/thorvald_001/object_distance', String, queue_size=1)
+        self.pose_pub = rospy.Publisher(
+            '/nearest_obstacle',
+            PoseStamped,queue_size=1
+        )
         rospy.Subscriber("/thorvald_001/back_scan", LaserScan, self.callback_back)
         rospy.Subscriber("/thorvald_001/front_scan", LaserScan, self.callback_front)
 
@@ -43,45 +52,76 @@ class Distance:
         """
         Callback called any time a new laser scan becomes available
         """
+
+        # Used to control when to publish
         self.activeB = True
 
+        (x, y, z), angle = self.getNearestCartesian(data)
+        
+        self.poseB.header = data.header
+        self.poseB.pose.position = Point(x, y, z)
+        self.poseB.pose.orientation = Quaternion(0, 0, sin(angle/2), cos(angle/2))
 
     ##################
     # callback_front #
     ##################
     def callback_front(self, data):
-        """
+        '''
         Callback called any time a new laser scan becomes available
-        """
+        '''
 
+        # Used to control when to publish
         self.activeF = True
 
-        min_dist = min(data.ranges)
-        laser_point_2d = [] * len(data.ranges)
-        for index,value in enumerate(data.ranges):
-            # NOTE x and y have been rotated
-            x = sin(ang) * value
-            y = cos(ang) * value
-
-            angle = data.angle_min + (index * data.angle_increment)
-
-            laser_point_2d[index] = [cos(angle) * value, sin(angle) * value, 0.0, angle]
+        (x, y, z), angle = self.getNearestCartesian(data)
         
-            print()
+        self.poseF.header = data.header
+        self.poseF.pose.position = Point(x, y, z)
+        self.poseF.pose.orientation = Quaternion(0, 0, sin(angle/2), cos(angle/2))
 
+    #######################
+    # getNearestCartesian #
+    #######################
+    def getNearestCartesian(self, data):
+        min_distance = data.range_max
+        angle = data.angle_max
+        for index,value in enumerate(data.ranges):
+            if value < min_distance:
+                min_distance = value
+                angle = data.angle_min + (index * data.angle_increment)
+
+        return (self.cartesian(angle, min_distance)), angle
+
+
+    #############
+    # cartesian #
+    #############
+    # Taken from https://www.mathsisfun.com/polar-cartesian-coordinates.html       
+    def cartesian(self, angle, distance):
+        return (distance * cos(angle), distance * sin(angle), 0.0)
 
     #######
     # pub #
     #######
     def pub(self):
-        if self.activeF and self.activeB:
-            self.distance['back'] = min(self.distance_front['back'], self.distance_back['back'])
-            self.distance['left'] = min(self.distance_front['left'], self.distance_back['left'])
-            self.distance['right'] = min(self.distance_front['right'], self.distance_back['right'])
-            self.distance['front'] = min(self.distance_front['front'], self.distance_back['front'])
-            self.distance['nearest'] = min(self.distance['front'], min(self.distance['back'], min(self.distance['right'],self.distance['left'])))
-            d_str = json.dumps(self.distance)
-            self.publisher.publish(d_str)
+        if not self.activeB or not self.activeF:
+            return
+        f = self.poseF.pose.position
+        b = self.poseB.pose.position
+        fd = sqrt((f.x * f.x) + (f.y * f.y))
+        bd = sqrt((b.x * b.x) + (b.y * b.y))
+
+        if fd <= bd:
+            pose = self.poseF
+        else:
+            pose = self.poseB
+
+
+
+        transformed_pose = self.listener.transformPose("thorvald_001/base_link", pose)
+        rospy.loginfo("The closest point in laser coords is at:\n%s" % pose)
+        rospy.loginfo("The closest point in robot coords is at:\n%s" % transformed_pose)
+        self.pose_pub.publish(pose)
 
 ########
 # main #
@@ -89,7 +129,7 @@ class Distance:
 def main():
     rospy.init_node('object_distance')
     distanceToObject = Distance()
-    rate = rospy.Rate(5)
+    rate = rospy.Rate(10)
     while not rospy.is_shutdown():
         distanceToObject.pub()
         rate.sleep()

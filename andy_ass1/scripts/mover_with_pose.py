@@ -82,12 +82,14 @@ class Mover:
         # use trigonometry to create the point in laser 
         # z = 0, in the frame of the laser 
         laser_point_2d = [ 
-            cos(alpha) * min_dist, 
+            cos(alpha) * min_dist,
             sin(alpha) * min_dist,
             0.0]
 
         # create an empty PoseStamped to be published later.
         pose = PoseStamped()
+
+        rospy.loginfo("The thorvald origin is at:\n%s" % thorvald_origin.pose)
 
         # keep the frame ID (the entire header here) as read from 
         # the sensor. This is general ROS practice, as it 
@@ -100,9 +102,9 @@ class Mover:
 
         # fill in the slots from the points calculated above.
         # bit tedious to do it this way, but hey... 
-        pose.pose.position.x = laser_point_2d[0]
-        pose.pose.position.y = laser_point_2d[1]
-        pose.pose.position.z = laser_point_2d[2]
+        pose.pose.position.x = laser_point_2d[0] 
+        pose.pose.position.y = laser_point_2d[1] 
+        pose.pose.position.z = laser_point_2d[2] 
 
         # using my trick from https://github.com/marc-hanheide/jupyter-notebooks/blob/master/quaternion.ipynb
         # to convert to quaternion, so that the Pose always 
@@ -126,11 +128,12 @@ class Mover:
 
         # now lets actually transform this pose into a robot 
         # "base_link" frame.
-        transformed_pose = self.listener.transformPose("map", pose)
-        rospy.loginfo(
-            "The closest point in robot coords is at:\n%s"
-            % transformed_pose.pose
-            )
+        transformed_pose = self.listener.transformPose("thorvald_001/base_link", pose)
+
+        #thorvald_origin.pose.position.x -= thorvald_origin.pose.position.x
+        #thorvald_origin.pose.position.y += thorvald_origin.pose.position.y
+        #thorvald_origin.pose.position.z -= thorvald_origin.pose.position.z
+        rospy.loginfo("The closest point in robot coords is at:\n%s" % transformed_pose.pose)
 
 
 
