@@ -9,6 +9,9 @@ import json
 import random
 from math import sqrt
 
+# TODO added namespace parameter and other params
+# TODO get PID control working
+
 #########
 # class #
 #########
@@ -122,7 +125,7 @@ class OpenMove:
     def callbackPose(self, data):
         ''' Listens for pose data '''
         
-        # NOTE x and Y are reversed - why - is would rotated?
+        # NOTE x and Y are reversed - why - is world rotated?
         self.positionX = data.position.y
         self.positionY = data.position.x
         self.positionZ = data.position.z

@@ -7,6 +7,8 @@ from tf import TransformListener
 import json
 from math import sqrt, sin, cos, degrees
 
+# TODO add namespace as a param using rospy.get_param
+
 ############
 # Distance #
 ############
