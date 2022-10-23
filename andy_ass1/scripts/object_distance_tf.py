@@ -100,7 +100,7 @@ class Distance:
     #######
     def pub(self):
         '''
-        Publishes the pose of the closest object from the one of the
+        Publishes the pose of the closest object from one of the
         LiDARs for RVIZ use. But only when both LiDARS have scanned.
         '''
         
