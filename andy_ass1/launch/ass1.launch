@@ -4,18 +4,17 @@
         <include file="$(find bacchus_gazebo)/launch/vineyard_demo.launch" />
 
         <!-- individual programs can be passed __ns:="/thorvald__001" on the rosrun cmd --> 
-        <group ns="/thorvald_001">
 
-                <!-- Publish aggregated object distance information around robot -->
-                <node pkg="andy_ass1" name="object_distance" type="object_distance.py" />
 
-                <!-- Publish object distance as pose -->
-                <node pkg="andy_ass1" name="object_distance_tf" type="object_distance_tf.py" />
+        <!-- Publish aggregated object distance information around robot -->
+        <node pkg="andy_ass1" name="object_distance" type="object_distance.py" />
+
+        <!-- Publish object distance as pose -->
+        <node pkg="andy_ass1" name="object_distance_tf" type="object_distance_tf.py"  />
                 
-                <!-- Uses object distance to avoid obstacles and moves randomly -->
-                <node pkg="andy_ass1" name="open_mover" type="open_move.py" /> 
+        <!-- Uses object distance to avoid obstacles and moves randomly 
+        <node pkg="andy_ass1" name="open_mover" type="open_move.py" ns="/thorvald_001" />  -->
 
-        </group>
-
+  
         
 </launch>

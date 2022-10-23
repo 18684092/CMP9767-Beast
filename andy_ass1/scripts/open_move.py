@@ -26,20 +26,22 @@ class OpenMove:
         self.direction = 'fwd'
         self.distance = objectDistance
         self.maxSpeed = speed
-        
+
+
+
         # Publish topics
-        self.publisher = rospy.Publisher('teleop_joy/cmd_vel', Twist, queue_size=1)
-        self.publisherDistance = rospy.Publisher('distance_travelled', String, queue_size=1)
+        self.publisher = rospy.Publisher('/thorvald_001/teleop_joy/cmd_vel', Twist, queue_size=1)
+        self.publisherDistance = rospy.Publisher('/thorvald_001/distance_travelled', String, queue_size=1)
         
         # Subscriber topics
-        rospy.Subscriber("object_distance", String, self.callback)
-        rospy.Subscriber("robot_pose", Pose, self.callbackPose)
+        rospy.Subscriber("/thorvald_001/object_distance", String, self.callback)
+        rospy.Subscriber("/thorvald_001/robot_pose", Pose, self.callbackPose)
         
         # pid stuff
         # Taken from https://www.youtube.com/watch?v=gbMUOgJInYs
-        self.Kp = 0.1
-        self.Ki = 0.01
-        self.Kd = 0.001
+        self.Kp = 0.01
+        self.Ki = 0.00001
+        self.Kd = 0.000001
         self.previous_error = 0
         self.previous_integral = 0
         self.target = 0
@@ -70,26 +72,60 @@ class OpenMove:
     # pid #
     #######
     # Taken from https://www.youtube.com/watch?v=gbMUOgJInY
-    def pid(self):
+    def pid2(self):
         t = 0.0
+        d = 1
         if self.direction == 'fwd' or self.direction == 'rev':
             t = (self.positionX)
         else:
             t = (self.positionY)
-        error = self.target -t
+        error = abs(self.target - t)
         integral = self.previous_integral + error
+        if error > self.previous_error:
+            d = -1
+        else: 
+            d = 1
         derivative = error - self.previous_error
-        z = self.Kp * error + self.Ki * integral + self.Kd * derivative
+        z = abs((self.Kp * error) + (self.Ki * integral) + (self.Kd * derivative))
+        rospy.loginfo("Perror : %s" % self.previous_error)
         self.previous_error = error
         self.previous_integral = integral
+        z *= d
+        rospy.loginfo("z      : %s" % str(z))
+        rospy.loginfo("error  : %s" % error)
+        
+        rospy.loginfo("current: %s" % t)
+        rospy.loginfo("Target : %s" % self.target)
+        rospy.loginfo("")
 
-        print("z",z)
-        print("error:",error)
-        print("Current:", t)
-        print("Target:", self.target)
-
-        z = 0
+        
         return z
+
+    def pid(self):
+        t = 0
+        z = 0
+        d = 0.02
+        if self.direction == 'fwd' or self.direction == 'rev':
+            t = (self.positionX)
+        else:
+            t = (self.positionY)
+
+        error = self.target - t
+        if self.direction == "fwd" or self.direction == "rgt":
+            if error > self.previous_error:
+                z = d
+            else:
+                z = -d
+        if self.direction == "rev" or self.direction == "lft":
+            if error > self.previous_error:
+                z = -d
+            else:
+                z = d
+        if abs(error) < 0.1:
+            z = 0
+        self.previous_error = error
+        return z
+
 
     ################
     # setPIDTarget #
@@ -124,7 +160,7 @@ class OpenMove:
     ################
     def callbackPose(self, data):
         ''' Listens for pose data '''
-        
+
         # NOTE x and Y are reversed - why - is world rotated?
         self.positionX = data.position.y
         self.positionY = data.position.x
