@@ -9,6 +9,9 @@ import json
 import random
 from math import sqrt
 
+# TODO added namespace parameter and other params
+# TODO get PID control working
+
 #########
 # class #
 #########
@@ -25,12 +28,12 @@ class OpenMove:
         self.maxSpeed = speed
         
         # Publish topics
-        self.publisher = rospy.Publisher('/thorvald_001/teleop_joy/cmd_vel', Twist, queue_size=1)
-        self.publisherDistance = rospy.Publisher('/thorvald_001/distance_travelled', String, queue_size=1)
+        self.publisher = rospy.Publisher('teleop_joy/cmd_vel', Twist, queue_size=1)
+        self.publisherDistance = rospy.Publisher('distance_travelled', String, queue_size=1)
         
         # Subscriber topics
-        rospy.Subscriber("/thorvald_001/object_distance", String, self.callback)
-        rospy.Subscriber("/thorvald_001/robot_pose", Pose, self.callbackPose)
+        rospy.Subscriber("object_distance", String, self.callback)
+        rospy.Subscriber("robot_pose", Pose, self.callbackPose)
         
         # pid stuff
         # Taken from https://www.youtube.com/watch?v=gbMUOgJInYs
@@ -122,7 +125,7 @@ class OpenMove:
     def callbackPose(self, data):
         ''' Listens for pose data '''
         
-        # NOTE x and Y are reversed - why - is would rotated?
+        # NOTE x and Y are reversed - why - is world rotated?
         self.positionX = data.position.y
         self.positionY = data.position.x
         self.positionZ = data.position.z
