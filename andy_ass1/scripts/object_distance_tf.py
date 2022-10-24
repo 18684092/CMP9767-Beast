@@ -117,7 +117,7 @@ class Distance:
         else:
             pose = self.poseB
 
-        transformed_pose = self.listener.transformPose("/thorvald_001/base_link", pose)
+        transformed_pose = self.listener.transformPose("thorvald_001/base_link", pose)
         self.posePub.publish(transformed_pose)
 
 ########
