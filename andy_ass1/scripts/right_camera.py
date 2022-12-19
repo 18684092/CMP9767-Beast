@@ -2,6 +2,7 @@ import rospy
 from sensor_msgs.msg import Image
 import numpy as np
 
+
 # Import OpenCV libraries and tools
 import cv2
 from cv_bridge import CvBridge, CvBridgeError
