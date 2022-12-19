@@ -76,10 +76,10 @@ class OpenMove:
         t = 0.0
         d = 1
         if self.direction == 'fwd' or self.direction == 'rev':
-            t = (self.positionX)
+            t = self.positionX
         else:
-            t = (self.positionY)
-        error = abs(self.target - t)
+            t = self.positionY
+        error = self.target - t
         integral = self.previous_integral + error
         if error > self.previous_error:
             d = -1

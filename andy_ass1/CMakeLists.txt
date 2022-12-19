@@ -164,6 +164,7 @@ include_directories(
    scripts/control.py
    scripts/object_distance_tf.py
    scripts/main_display.py
+   scripts/right_camera.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
  )
 
