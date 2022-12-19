@@ -10,7 +10,7 @@ from cv_bridge import CvBridge, CvBridgeError
 
 # Define a function to show the image in an OpenCV Window
 def show_image(img, name):
-    print("Showing image")
+    #print("Showing image")
     cv2.imshow(name, img)
     cv2.waitKey(3)
 
@@ -20,8 +20,7 @@ def image_callback(img_msg):
     rospy.loginfo(img_msg.header)
 
     cv_image = bridge.imgmsg_to_cv2(img_msg, "passthrough")
-    
-    cv_image2 = bridge.imgmsg_to_cv2(img_msg, "passthrough")
+    cv_image2 = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
     
     #scale_percent = 50 # percent of original size
     #width = int(cv_image.shape[1] * scale_percent / 100)
@@ -51,14 +50,24 @@ def image_callback(img_msg):
     cnts = cv2.findContours(dilation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = cnts[0] if len(cnts) == 2 else cnts[1]
     min_area = 550
-    white_dots = []
+    bunches = []
+
+    # Taken from https://pyimagesearch.com/2016/02/01/opencv-center-of-contour/
+    # Taken from https://stackoverflow.com/questions/56995532/opencv-blob-detector-isnt-detecting-white-blobs
+    i = 0
     for c in cnts:
+        M = cv2.moments(c)
+        cX = int(M["m10"] / M["m00"])
+        cY = int(M["m01"] / M["m00"])
         area = cv2.contourArea(c)
         if area > min_area:
-            cv2.drawContours(cv_image2, [c], -1, (0,0,255), 3)
-            white_dots.append(c)
+            i += 1
+            cv2.drawContours(cv_image2, [c], -1, (0,0,255), 2)
+            cv2.circle(cv_image2, (cX, cY), 7, (255, 255, 255), -1)
+            cv2.putText(cv_image2, str(i), (cX - 20, cY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            bunches.append(c)
 
-    print(len(white_dots))
+    print(len(bunches))
 
 
 
