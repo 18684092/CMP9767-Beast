@@ -29,7 +29,7 @@ def image_callback(img_msg):
     #dim = (width, height)
     
     # resize image
-    #cv_image = cv2.resize(cv_image, dim, interpolation = cv2.INTER_AREA)
+    #cv_image2 = cv2.resize(cv_image2, dim, interpolation = cv2.INTER_AREA)
     
     hsv = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
     blue_lower=np.array([0,2,50],np.uint8) # 80 was 90
@@ -50,12 +50,12 @@ def image_callback(img_msg):
     show_image(dilation, "dilation")
     cnts = cv2.findContours(dilation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = cnts[0] if len(cnts) == 2 else cnts[1]
-    min_area = 350
+    min_area = 550
     white_dots = []
     for c in cnts:
         area = cv2.contourArea(c)
         if area > min_area:
-            cv2.drawContours(cv_image2, [c], -1, (0,0,255), 1)
+            cv2.drawContours(cv_image2, [c], -1, (0,0,255), 3)
             white_dots.append(c)
 
     print(len(white_dots))
