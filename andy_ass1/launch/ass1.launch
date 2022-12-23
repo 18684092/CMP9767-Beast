@@ -8,12 +8,12 @@
         <!-- Publish object distance as pose -->
         <node pkg="andy_ass1" name="object_distance_tf" type="object_distance_tf.py"  />
                 
-        <!-- Uses object distance to avoid obstacles and moves randomly -->
-        <node pkg="andy_ass1" name="open_mover" type="open_move.py" ns="/thorvald_001" />  
+        <!-- Uses object distance to avoid obstacles and moves randomly 
+        <node pkg="andy_ass1" name="open_mover" type="open_move.py" ns="/thorvald_001" /> -->
 
         <node pkg="andy_ass1" name="main_display" type="main_display.py"  />
 
-        <node pkg="andy_ass1" name="right_camera" type="right_camera.py"  />
+
         <node pkg="andy_ass1" name="left_camera" type="left_camera.py"  />
         <node pkg="andy_ass1" name="front_camera" type="front_camera.py"  />
   
