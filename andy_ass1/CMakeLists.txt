@@ -165,6 +165,8 @@ include_directories(
    scripts/object_distance_tf.py
    scripts/main_display.py
    scripts/right_camera.py
+   scripts/left_camera.py
+   scripts/front_camera.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
  )
 

@@ -15,7 +15,7 @@ class findBunches:
     ########
     # init #
     ########
-    def __init__(self, camera = "right"):
+    def __init__(self, camera = "front"):
         self.camera = camera
         self.cv_image = None
         self.orig_image = None
