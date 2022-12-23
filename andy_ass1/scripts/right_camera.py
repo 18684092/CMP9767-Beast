@@ -1,7 +1,7 @@
 import rospy
 import roslib, rospy, image_geometry, tf
-from sensor_msgs.msg import Image, CameraInfo
-from geometry_msgs.msg import PoseStamped, PoseArray, Pose
+from sensor_msgs.msg import Image, CameraInfo, PointCloud
+from geometry_msgs.msg import PoseStamped, PoseArray, Pose, Point
 import numpy as np
 
 
@@ -35,6 +35,7 @@ class findBunches:
         rospy.Subscriber("/thorvald_001/kinect2_" + camera + "_sensor/sd/image_depth_rect", Image, self.image_depth_callback)
         self.tf_listener = tf.TransformListener()
         self.object_location_pub = rospy.Publisher('/thorvald_001/object_location', PoseArray, queue_size=10)
+        self.object_location_pub2 = rospy.Publisher('/thorvald_001/grapes_'+camera, PointCloud, queue_size=10)
 
 
     def camera_info_callback(self, data):
@@ -89,8 +90,10 @@ class findBunches:
     def getPositions(self):
         image_depth = self.bridge.imgmsg_to_cv2(self.image_depth_ros, "32FC1")
         ps = PoseArray()
+        pc = PointCloud()
         ps.header.frame_id = "map"
-        #ps.header.stamp = rospy.Time.now()
+        pc.header.frame_id = "map"
+        pc.header.stamp = rospy.Time.now()
         cnts = cv2.findContours(self.erosion, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = cnts[0] if len(cnts) == 2 else cnts[1]
         min_area = 250
@@ -125,7 +128,7 @@ class findBunches:
 
                     #define a point in camera coordinates
                     object_location = PoseStamped()
-                    object_location.header.frame_id = "thorvald_001/kinect2_right_rgb_optical_frame"
+                    object_location.header.frame_id = "thorvald_001/kinect2_" + self.camera + "_rgb_optical_frame"
                     object_location.pose.orientation.w = 1
                     
                     object_location.pose.position.x = camera_coords[0]
@@ -136,17 +139,24 @@ class findBunches:
                         # print out the coordinates in the map frame
                         p_camera = self.tf_listener.transformPose('map', object_location)
                         
+                        
                         #print(p_camera)
                         if "nan" not in str(p_camera.pose):
                             ps.poses.append(p_camera.pose)
-                    except:
-                        print("ar crap")
+                            p = Point()
+                            p.x = p_camera.pose.position.x
+                            p.y = p_camera.pose.position.y
+                            p.z = p_camera.pose.position.z
+                            pc.points.append(p)
+                    except Exception as e:
+                        print("ar crap", e)
                 except:
                     cv2.circle(self.orig_image, (cX, cY), 7, (0, 0, 255), -1)
         self.object_location_pub.publish(ps)
-        #print("ps",ps)
-        print("original", self.orig_image.shape)
-        print("depth", image_depth.shape )
+        self.object_location_pub2.publish(pc)
+        print("ps",pc)
+        #print("original", self.orig_image.shape)
+        #print("depth", image_depth.shape )
 
         return i
 

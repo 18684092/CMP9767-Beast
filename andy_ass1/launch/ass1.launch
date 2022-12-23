@@ -16,6 +16,7 @@
 
         <node pkg="andy_ass1" name="left_camera" type="left_camera.py"  />
         <node pkg="andy_ass1" name="front_camera" type="front_camera.py"  />
+        <node pkg="andy_ass1" name="right_camera" type="right_camera.py"  />
   
         
 </launch>
