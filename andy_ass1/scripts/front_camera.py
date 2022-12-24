@@ -1,7 +1,7 @@
 import rospy
 import roslib, rospy, image_geometry, tf
-from sensor_msgs.msg import Image, CameraInfo, PointCloud
-from geometry_msgs.msg import PoseStamped, PoseArray, Pose, Point
+from sensor_msgs.msg import Image, CameraInfo, PointCloud, ChannelFloat32
+from geometry_msgs.msg import PoseStamped, PoseArray, Pose, Point, Point32
 import numpy as np
 
 
@@ -143,11 +143,15 @@ class findBunches:
                         #print(p_camera)
                         if "nan" not in str(p_camera.pose):
                             ps.poses.append(p_camera.pose)
-                            p = Point()
+                            p = Point32()
+                            c = ChannelFloat32()
                             p.x = p_camera.pose.position.x
                             p.y = p_camera.pose.position.y
                             p.z = p_camera.pose.position.z
                             pc.points.append(p)
+                            c.name = "intensity"
+                            c.values = (area, area, area)
+                            pc.channels.append(c)
                     except Exception as e:
                         print("ar crap", e)
                 except:
@@ -206,7 +210,7 @@ class findBunches:
 def main():
     rospy.init_node('bunches', anonymous=True)
     bunch = findBunches()
-    rate = rospy.Rate(30)
+    rate = rospy.Rate(100)
     while not rospy.is_shutdown():     
         rate.sleep()
 
