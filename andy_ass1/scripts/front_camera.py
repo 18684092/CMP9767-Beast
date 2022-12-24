@@ -34,8 +34,8 @@ class findBunches:
         self.camera_info_sub = rospy.Subscriber('/thorvald_001/kinect2_' + camera + '_camera/hd/camera_info', CameraInfo, self.camera_info_callback)
         rospy.Subscriber("/thorvald_001/kinect2_" + camera + "_sensor/sd/image_depth_rect", Image, self.image_depth_callback)
         self.tf_listener = tf.TransformListener()
-        self.object_location_pub = rospy.Publisher('/thorvald_001/object_location', PoseArray, queue_size=10)
-        self.object_location_pub2 = rospy.Publisher('/thorvald_001/grapes_'+camera, PointCloud, queue_size=10)
+        self.object_location_pub = rospy.Publisher('/thorvald_001/object_location', PoseArray, queue_size=1)
+        self.object_location_pub2 = rospy.Publisher('/thorvald_001/grapes_'+camera, PointCloud, queue_size=1)
 
 
     def camera_info_callback(self, data):
