@@ -18,7 +18,7 @@ class Collate:
         right = rospy.Subscriber('/thorvald_001/grapes_right', PointCloud, self.right_callback)
         front = rospy.Subscriber('/thorvald_001/grapes_front', PointCloud, self.front_callback)
 
-        self.grapeBunches = rospy.Publisher('/thorvald_001/grape_bunches', PointCloud, queue_size=10, latch=False)
+        self.grapeBunches = rospy.Publisher('/thorvald_001/grape_bunches', PointCloud, queue_size=30, latch=False)
 
     def left_callback(self, data):
         self.collate_points(data)
@@ -35,7 +35,7 @@ class Collate:
         pcBunches.header.stamp = rospy.Time.now()
         intensities = []
         for i, pointDict in enumerate(self.bunches):
-            if pointDict['n'] > 1 and pointDict['i'] > 10:
+            if pointDict['n'] > 5:
                 p = Point32()
                 intensities.append(pointDict['i'])
                 p.x = pointDict['x']
@@ -47,16 +47,16 @@ class Collate:
         c.values = intensities
         pcBunches.channels=[c]       
         self.grapeBunches.publish(pcBunches)
-
+        print(len(pcBunches.points))
        
 
     def collate_points(self, pc):
         for point,channel in zip(pc.points, pc.channels):
-            # Is point within 5cm of stored 3D point?
-            x = round(point.x,3)
-            y = round(point.y,3)
-            z = round(point.z,3) 
-            i = channel.values[0]
+            # Is point within xcm of stored 3D point?
+            x = point.x
+            y = point.y
+            z = point.z 
+            inten = channel.values[0]
             found = False
             if z > 0.1:
                 for i, pointDict in enumerate(self.bunches):
@@ -67,16 +67,15 @@ class Collate:
                     dX = abs(abs(sX) - abs(x))
                     dY = abs(abs(sY) - abs(y))
                     dZ = abs(abs(sZ) - abs(z))
-                    if dX < 0.05 and dY < 0.05 and dZ < 0.05:
+                    if dX < 0.1 and dY < 0.1 and dZ < 0.1:
                         self.bunches[i]['n'] += 1
-                        if self.bunches[i]['i'] < i:
-                           self.bunches[i]['i'] = i 
+                        if self.bunches[i]['i'] < inten:
+                           self.bunches[i]['i'] = inten 
                         found = True
                 if not found:
-                    self.bunches.append({'x':x, 'y':y, 'z':z, 'n':1, 'i':i })
-        self.bunches = sorted(self.bunches, key=itemgetter('i'), reverse=True)
-        print(len(self.bunches))
-        print()
+                    self.bunches.append({'x':x, 'y':y, 'z':z, 'n':1, 'i':inten })
+        self.bunches = sorted(self.bunches, key=itemgetter('i'), reverse=False)
+
 
 ########
 # main #

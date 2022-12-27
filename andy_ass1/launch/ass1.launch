@@ -1,6 +1,12 @@
 <launch>
 
-
+        <!-- Launch the simulator demo -->
+        <include file="$(find bacchus_gazebo)/launch/vineyard_demo.launch">
+                <arg name="world_name" default="vineyard_small_s4_coarse"/>
+                <arg name="nav_map_yaml" default="/home/ubuntu/ros_ws/src/andy_ass1/maps/vineyard.yaml" />
+                <arg name="rviz_config_file" default="/home/ubuntu/ros_ws/src/andy_ass1/worlds/andy1.rviz"/>
+                <arg name="world" default="/home/ubuntu/ros_ws/src/andy_ass1/worlds/vineyard_blocks.world"/>
+        </include>
 
         <!-- Publish aggregated object distance information around robot -->
         <node pkg="andy_ass1" name="object_distance" type="object_distance.py" />
@@ -8,17 +14,24 @@
         <!-- Publish object distance as pose -->
         <node pkg="andy_ass1" name="object_distance_tf" type="object_distance_tf.py"  />
                 
-        <!-- Uses object distance to avoid obstacles and moves randomly 
-        <node pkg="andy_ass1" name="open_mover" type="open_move.py" ns="/thorvald_001" /> -->
+        <!-- Uses object distance to avoid obstacles and moves randomly -->
+        <node pkg="andy_ass1" name="open_mover" type="open_move.py" ns="/thorvald_001" /> 
 
         <node pkg="andy_ass1" name="main_display" type="main_display.py"  />
 
 
-        <node pkg="andy_ass1" name="left_camera" type="left_camera.py"  />
-        <node pkg="andy_ass1" name="front_camera" type="front_camera.py"  />
-        <node pkg="andy_ass1" name="right_camera" type="right_camera.py"  />
+        <node pkg="andy_ass1" name="cameraLeft" type="camera.py">
+                <param name="camera" value="left" type="string" /> 
+        </node>
+        <node pkg="andy_ass1" name="cameraRight" type="camera.py">  
+                <param name="camera" value="right" type="string" />
+        </node>
 
-        <!-- <node pkg="andy_ass1" name="point_colation" type="point_colation.py"  /> -->
+        <node pkg="andy_ass1" name="cameraFront" type="camera.py">
+                <param name="camera" value="front" type="string" />
+        </node>
+
+        <node pkg="andy_ass1" name="point_colation" type="point_colation.py"  /> 
   
         
 </launch>

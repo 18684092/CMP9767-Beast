@@ -35,7 +35,7 @@ class findBunches:
         rospy.Subscriber("/thorvald_001/kinect2_" + camera + "_sensor/sd/image_depth_rect", Image, self.image_depth_callback)
         self.tf_listener = tf.TransformListener()
         self.object_location_pub = rospy.Publisher('/thorvald_001/object_location', PoseArray, queue_size=1)
-        self.object_location_pub2 = rospy.Publisher('/thorvald_001/grapes_'+camera, PointCloud, queue_size=1)
+        self.object_location_pub2 = rospy.Publisher('/thorvald_001/grapes_' + camera, PointCloud, queue_size=1)
 
 
     def camera_info_callback(self, data):
@@ -93,7 +93,6 @@ class findBunches:
         pc = PointCloud()
         ps.header.frame_id = "map"
         pc.header.frame_id = "map"
-        pc.header.stamp = rospy.Time.now()
         cnts = cv2.findContours(self.erosion, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = cnts[0] if len(cnts) == 2 else cnts[1]
         min_area = 250
@@ -129,8 +128,8 @@ class findBunches:
                     #define a point in camera coordinates
                     object_location = PoseStamped()
                     object_location.header.frame_id = "thorvald_001/kinect2_" + self.camera + "_rgb_optical_frame"
-                    object_location.pose.orientation.w = 1
                     
+                    object_location.pose.orientation.w = 1
                     object_location.pose.position.x = camera_coords[0]
                     object_location.pose.position.y = camera_coords[1]
                     object_location.pose.position.z = camera_coords[2] 
@@ -150,7 +149,7 @@ class findBunches:
                             p.z = p_camera.pose.position.z
                             pc.points.append(p)
                             c.name = "intensity"
-                            c.values = (area, area, area)
+                            c.values = (area * depth_value, area * depth_value, area * depth_value)
                             pc.channels.append(c)
                     except Exception as e:
                         print("ar crap", e)

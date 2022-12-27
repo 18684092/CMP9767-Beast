@@ -20,7 +20,7 @@ class OpenMove:
     ########
     # init #
     ########
-    def __init__(self, objectDistance=1, speed=1):
+    def __init__(self, objectDistance=1, speed=0.3):
         self.cmdMap = {'fwd': 'front', 'rev': 'back', 'lft': 'left', 'rgt': 'right'}
         self.od = {}
         self.direction = 'fwd'
@@ -284,7 +284,7 @@ class OpenMove:
 ########
 def main():
     rospy.init_node('open_mover')
-    move = OpenMove(1,1)
+    move = OpenMove(1,0.3)
     rate = rospy.Rate(5)
     while not rospy.is_shutdown():
         move.decision()
