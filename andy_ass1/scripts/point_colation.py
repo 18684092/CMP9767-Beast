@@ -20,6 +20,10 @@ class Collate:
 
         self.grapeBunches = rospy.Publisher('/thorvald_001/grape_bunches', PointCloud, queue_size=30, latch=False)
 
+    #################
+    # left_callback #
+    #################
+    # Left camera will publish a point cloud 
     def left_callback(self, data):
         self.collate_points(data)
 
