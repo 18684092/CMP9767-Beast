@@ -1,9 +1,14 @@
+###################################
+# Author: Andy Perrett (18684092) #
+# Date  : 27th December 2022      #
+# Module: CMP9767                 #
+###################################
+
 import rospy
 import roslib, rospy, image_geometry, tf
 from sensor_msgs.msg import Image, CameraInfo, PointCloud, ChannelFloat32
 from geometry_msgs.msg import PoseStamped, PoseArray, Pose, Point, Point32
 import numpy as np
-
 
 # Import OpenCV libraries and tools
 import cv2
@@ -45,9 +50,14 @@ class findBunches:
         sub_image = rospy.Subscriber("/thorvald_001/kinect2_" + self.camera + "_camera/hd/image_color_rect", Image, self.image_callback)
         self.camera_info_sub = rospy.Subscriber('/thorvald_001/kinect2_' + camera + '_camera/hd/camera_info', CameraInfo, self.camera_info_callback)
         rospy.Subscriber("/thorvald_001/kinect2_" + camera + "_sensor/sd/image_depth_rect", Image, self.image_depth_callback)
+        
+        # Publish a pointcloud - NOTE - intensities are own format and not compatible with RVIZ
+        # but these get changed and made compatible by collate_point.py ready for RVIZ.
         self.object_location_pub2 = rospy.Publisher('/thorvald_001/grapes_'+camera, PointCloud, queue_size=1)
 
-
+    ########################
+    # camera_info_callback #
+    ########################
     def camera_info_callback(self, data):
         self.camera_model = image_geometry.PinholeCameraModel()
         self.camera_model.fromCameraInfo(data)
@@ -59,13 +69,13 @@ class findBunches:
     ##############
     # show_image #
     ##############
-    # https://www.tutorialkart.com/opencv/python/opencv-python-resize-image/
     def show_image(self, img, name): 
         cv2.imshow(name, self.iResize(img))
         
     ###########
     # iResize #
     ###########
+    # https://www.tutorialkart.com/opencv/python/opencv-python-resize-image/
     def iResize(self, img):
         scale_percent = 50 
         width = int(img.shape[1] * scale_percent / 100)

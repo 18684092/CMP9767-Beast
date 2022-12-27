@@ -1,4 +1,8 @@
-
+###################################
+# Author: Andy Perrett (18684092) #
+# Date  : 27th December 2022      #
+# Module: CMP9767                 #
+################################### 
 
 import rospy
 
