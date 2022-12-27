@@ -63,13 +63,18 @@ class findBunches:
         self.camera_model.fromCameraInfo(data)
         self.camera_info_sub.unregister() #Only subscribe once
 
+    ########################
+    # image_depth_callback #
+    ########################
     def image_depth_callback(self, data):
+        ''' Receives kinect2 depth data '''
         self.image_depth_ros = data
 
     ##############
     # show_image #
     ##############
-    def show_image(self, img, name): 
+    def show_image(self, img, name):
+        ''' Displays an image ''' 
         cv2.imshow(name, self.iResize(img))
         
     ###########
@@ -77,6 +82,7 @@ class findBunches:
     ###########
     # https://www.tutorialkart.com/opencv/python/opencv-python-resize-image/
     def iResize(self, img):
+        ''' Resizes an image '''
         scale_percent = 50 
         width = int(img.shape[1] * scale_percent / 100)
         height = int(img.shape[0] * scale_percent / 100)
@@ -128,6 +134,7 @@ class findBunches:
                 cv2.circle(self.orig_image, (cX, cY), 7, (255, 255, 255), -1)
                 cv2.putText(self.orig_image, str(i), (cX - 20, cY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
                 self.bunches.append(c)
+                # The depth array is smaller than the original colour image
                 try:
                     depth_coords = (image_depth.shape[0] / 2 + (cY - self.orig_image.shape[0] / 2) * self.color2depth_aspect, 
                         image_depth.shape[1] / 2 + (cX - self.orig_image.shape[1] / 2) * self.color2depth_aspect)
@@ -140,8 +147,6 @@ class findBunches:
                     camera_coords = [x/camera_coords[2] for x in camera_coords] # adjust the resulting vector so that z = 1
                     camera_coords = [x*depth_value for x in camera_coords] # multiply the vector by depth
 
-                    #print('camera coords: ', camera_coords)
-
                     #define a point in camera coordinates
                     object_location = PoseStamped()
                     object_location.header.frame_id = "thorvald_001/kinect2_" + self.camera + "_rgb_optical_frame"
@@ -149,7 +154,7 @@ class findBunches:
                     object_location.pose.position.x = camera_coords[0]
                     object_location.pose.position.y = camera_coords[1]
                     object_location.pose.position.z = camera_coords[2] 
-
+                    # Try/except when debugging making a point cloud - shouldnt be needed
                     try:
                         # print out the coordinates in the map frame
                         p_camera = self.tf_listener.transformPose('map', object_location)
@@ -164,10 +169,13 @@ class findBunches:
                             c.name = "intensity"
                             c.values = (area * depth_value, area * depth_value, area * depth_value)
                             pc.channels.append(c)
+                    # Shouldn't get here NOTE and we don't appear to, ever        
                     except Exception as e:
                         print("ar crap", e)
+                # If point is out of bounds (no depth info) display it as red dot        
                 except:
                     cv2.circle(self.orig_image, (cX, cY), 7, (0, 0, 255), -1)
+        # Publish the point cloud
         self.object_location_pub2.publish(pc)
         return i
 
@@ -175,23 +183,46 @@ class findBunches:
     # image_callback #
     ##################
     def image_callback(self, img_msg):
+        ''' Find grapes which are of a particular hue,
+        produce a mask, blur slightly, dilate then erode.
+        Find contours of blobs, find centroids of contours,
+        publish their position with respect to map.
+        '''
+        # Image is BGR
         self.cv_image = self.bridge.imgmsg_to_cv2(img_msg, "passthrough")
+        # We want to display a nice colour correct image
         self.orig_image = cv2.cvtColor(self.cv_image, cv2.COLOR_BGR2RGB)
+
+        # Colour format will change blue (ish) grapes to brown (ish) but we don't care
         hsv = cv2.cvtColor(self.cv_image, cv2.COLOR_BGR2HSV)
         blue_lower=np.array([0,2,50],np.uint8) 
         blue_upper=np.array([50,255,195],np.uint8)
+
+        # The mask is used to find contours / blobs
         mask = cv2.inRange(hsv, blue_lower, blue_upper)
+        
+        # The result shows individual grapes
         res = cv2.bitwise_and(hsv, self.cv_image, mask=mask)
+
+        # Used as params for erosion and dilation
         kernel = np.ones((5,5),np.uint8) # was 5	
         kernel2 = np.ones((7,7),np.uint8) # was 11
+
         gray = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)
+
+        # Blurring seems to make detection more robust
         gray = cv2.blur(gray, (3,3)	) # was 5
         (thresh, gray) = cv2.threshold(gray, 0, 198, cv2.THRESH_BINARY)
-        dilation = cv2.dilate(gray,kernel,iterations = 1)
+        dilation = cv2.dilate(gray, kernel, iterations = 1)
         self.erosion = cv2.morphologyEx(dilation, cv2.MORPH_OPEN, kernel2)
         
+        # Uses contours to get grape bunches
         i = self.getPositions()
+
+        # Returns number of grape within mask image
         num_labels = self.connectedComponents(mask)
+
+        # This try is for debugging
         try:
             print("Avg per bunch: ", int(num_labels/i) )
         except:
@@ -205,7 +236,7 @@ class findBunches:
     def showImages(self):
         #self.show_image(self.erosion, "Eroded")
         self.show_image(self.orig_image, self.camera)
-        #self.show_image(self.labeled_image, "main")
+        self.show_image(self.labeled_image, "Grapes")
         cv2.waitKey(1)
 
 ########

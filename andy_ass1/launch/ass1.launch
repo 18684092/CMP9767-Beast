@@ -19,7 +19,9 @@
         <node pkg="andy_ass1" name="object_distance_tf" type="object_distance_tf.py"  />
                 
         <!-- Uses object distance to avoid obstacles and moves randomly -->
-        <node pkg="andy_ass1" name="open_mover" type="open_move.py" ns="/thorvald_001" /> 
+        <node pkg="andy_ass1" name="open_mover" type="open_move.py" ns="/thorvald_001" >
+                <param name="speed" value="1.0" type="string" /> 
+        </node> 
 
         <!-- Information display -->
         <node pkg="andy_ass1" name="main_display" type="main_display.py"  />

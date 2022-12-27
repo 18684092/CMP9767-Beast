@@ -284,7 +284,11 @@ class OpenMove:
 ########
 def main():
     rospy.init_node('open_mover')
-    move = OpenMove(1,0.3)
+    try:
+        speed = float(rospy.get_param('~speed'))
+    except:
+        speed = 0.3 
+    move = OpenMove(1,speed)
     rate = rospy.Rate(5)
     while not rospy.is_shutdown():
         move.decision()
