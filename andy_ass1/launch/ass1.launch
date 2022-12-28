@@ -10,6 +10,8 @@
                 <arg name="rviz_config_file" default="/home/ubuntu/ros_ws/src/andy_ass1/worlds/andy1.rviz"/>
                 <!-- Load a modified Gazebo world with objects -->
                 <arg name="world" default="/home/ubuntu/ros_ws/src/andy_ass1/worlds/vineyard_blocks.world"/>
+
+                <arg name="gui" default="false"/>
         </include>
 
         <!-- Publish aggregated object distance information around robot -->
@@ -20,7 +22,8 @@
                 
         <!-- Uses object distance to avoid obstacles and moves randomly -->
         <node pkg="andy_ass1" name="open_mover" type="open_move.py" ns="/thorvald_001" >
-                <param name="speed" value="1.0" type="string" /> 
+                <param name="speed" value="0.6" type="string" /> 
+                <param name="distance" value="1.25" type="string" />
         </node> 
 
         <!-- Information display -->

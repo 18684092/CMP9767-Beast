@@ -30,8 +30,8 @@ class OpenMove:
 
 
         # Publish topics
-        self.publisher = rospy.Publisher('/thorvald_001/teleop_joy/cmd_vel', Twist, queue_size=1)
-        self.publisherDistance = rospy.Publisher('/thorvald_001/distance_travelled', String, queue_size=1)
+        self.publisher = rospy.Publisher('/thorvald_001/teleop_joy/cmd_vel', Twist, queue_size=10)
+        self.publisherDistance = rospy.Publisher('/thorvald_001/distance_travelled', String, queue_size=10)
         
         # Subscriber topics
         rospy.Subscriber("/thorvald_001/object_distance", String, self.callback)
@@ -286,9 +286,11 @@ def main():
     rospy.init_node('open_mover')
     try:
         speed = float(rospy.get_param('~speed'))
+        distance = float(rospy.get_param('~distance'))
     except:
-        speed = 0.3 
-    move = OpenMove(1,speed)
+        speed = 0.3
+        distance = 1.0 
+    move = OpenMove(distance, speed)
     rate = rospy.Rate(5)
     while not rospy.is_shutdown():
         move.decision()

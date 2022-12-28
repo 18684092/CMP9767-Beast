@@ -21,6 +21,7 @@ class findBunches:
     camera_model = None
     image_depth_ros = None
 
+
     ########
     # init #
     ########
@@ -28,11 +29,14 @@ class findBunches:
 
         # So we known which camera we are
         self.camera = camera
+        self.num_bunches = 0
+        self.num_labels = 0
 
         # Stores various images
         self.cv_image = None
         self.orig_image = None
         self.labeled_image = None
+        self.image_depth = None
 
         # 1920 is width of HD colour, 512 is SD depth width
         # 84.1 and 70.0 taken from kinect2-gazebo.xacro file
@@ -95,7 +99,7 @@ class findBunches:
     # connectedComponents #
     #######################
     def connectedComponents(self, img):
-        num_labels, labels = cv2.connectedComponents(img)
+        self.num_labels, labels = cv2.connectedComponents(img)
         # Map component labels to hue val, 0-179 is the hue range in OpenCV
         label_hue = np.uint8(179 * labels / np.max(labels))
         blank_ch = 255*np.ones_like(label_hue)
@@ -105,7 +109,7 @@ class findBunches:
         # set bg label to black
         self.labeled_image[label_hue==0] = 0
         #self.labeled_image = cv2.cvtColor(self.labeled_image, cv2.COLOR_BGR2RGB)
-        return num_labels
+        
 
     ################
     # getPositions #
@@ -114,33 +118,33 @@ class findBunches:
     # Taken from https://pyimagesearch.com/2016/02/01/opencv-center-of-contour/
     # https://docs.opencv.org/4.x/dd/d49/tutorial_py_contour_features.html
     def getPositions(self):
-        image_depth = self.bridge.imgmsg_to_cv2(self.image_depth_ros, "32FC1")
+        
         pc = PointCloud()
         pc.header.frame_id = "map"
         cnts = cv2.findContours(self.erosion, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = cnts[0] if len(cnts) == 2 else cnts[1]
         min_area = 250
-        i = 0
+        self.num_bunches = 0
         for c in cnts:
             M = cv2.moments(c)
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
             area = cv2.contourArea(c)
             if area > min_area:
-                i += 1
+                self.num_bunches += 1
                 cv2.drawContours(self.orig_image, [c], -1, (0,0,255), 2)
                 x,y,w,h = cv2.boundingRect(c)
                 #cv2.rectangle(self.orig_image,(x,y),(x+w,y+h),(0,255,0),2)
                 cv2.circle(self.orig_image, (cX, cY), 7, (255, 255, 255), -1)
-                cv2.putText(self.orig_image, str(i), (cX - 20, cY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                cv2.putText(self.orig_image, str(self.num_bunches), (cX - 20, cY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
                 self.bunches.append(c)
                 # The depth array is smaller than the original colour image
                 try:
-                    depth_coords = (image_depth.shape[0] / 2 + (cY - self.orig_image.shape[0] / 2) * self.color2depth_aspect, 
-                        image_depth.shape[1] / 2 + (cX - self.orig_image.shape[1] / 2) * self.color2depth_aspect)
+                    depth_coords = (self.image_depth.shape[0] / 2 + (cY - self.orig_image.shape[0] / 2) * self.color2depth_aspect, 
+                        self.image_depth.shape[1] / 2 + (cX - self.orig_image.shape[1] / 2) * self.color2depth_aspect)
                 
                     # get the depth reading at the centroid location
-                    depth_value = image_depth[int(depth_coords[0]), int(depth_coords[1])] # you might need to do some boundary checking first!
+                    depth_value = self.image_depth[int(depth_coords[0]), int(depth_coords[1])] # you might need to do some boundary checking first!
 
                     # calculate object's 3d location in camera coords
                     camera_coords = self.camera_model.projectPixelTo3dRay((cX, cY)) #project the image coords (x,y) into 3D ray in camera coords 
@@ -177,7 +181,7 @@ class findBunches:
                     cv2.circle(self.orig_image, (cX, cY), 7, (0, 0, 255), -1)
         # Publish the point cloud
         self.object_location_pub2.publish(pc)
-        return i
+        
 
     ##################
     # image_callback #
@@ -190,6 +194,7 @@ class findBunches:
         '''
         # Image is BGR
         self.cv_image = self.bridge.imgmsg_to_cv2(img_msg, "passthrough")
+        self.image_depth = self.bridge.imgmsg_to_cv2(self.image_depth_ros, "32FC1")
         # We want to display a nice colour correct image
         self.orig_image = cv2.cvtColor(self.cv_image, cv2.COLOR_BGR2RGB)
 
@@ -217,14 +222,14 @@ class findBunches:
         self.erosion = cv2.morphologyEx(dilation, cv2.MORPH_OPEN, kernel2)
         
         # Uses contours to get grape bunches
-        i = self.getPositions()
+        self.getPositions()
 
         # Returns number of grape within mask image
-        num_labels = self.connectedComponents(mask)
+        self.connectedComponents(mask)
 
         # This try is for debugging
         try:
-            print("Avg per bunch: ", int(num_labels/i) )
+            print("Avg per bunch: ", int(self.num_labels/self.num_bunches) )
         except:
             pass
 
@@ -234,9 +239,12 @@ class findBunches:
     # showImages #
     ##############
     def showImages(self):
-        #self.show_image(self.erosion, "Eroded")
-        self.show_image(self.orig_image, self.camera)
-        self.show_image(self.labeled_image, "Grapes")
+        
+        if self.num_bunches > 0:
+            self.show_image(self.orig_image, self.camera)
+            #self.show_image(self.erosion, "Eroded")
+        if self.num_labels > 20:
+            self.show_image(self.labeled_image, self.camera + " Grapes")
         cv2.waitKey(1)
 
 ########

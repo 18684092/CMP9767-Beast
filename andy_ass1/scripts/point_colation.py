@@ -66,8 +66,9 @@ class Collate:
         pcBunches.header.stamp = rospy.Time.now()
         intensities = []
         for i, pointDict in enumerate(self.bunches):
+            if i > 200: break
             # Each point must have been seen x times to show its a reliable point - (needs to be a particle filter)
-            if pointDict['n'] > 5:
+            if pointDict['n'] > 1:
                 p = Point32()
                 intensities.append(pointDict['i'])
                 p.x = pointDict['x']
@@ -103,7 +104,7 @@ class Collate:
                     dY = abs(abs(sY) - abs(y))
                     dZ = abs(abs(sZ) - abs(z))
                     # Crude filter to group noisy point clouds - not effective really
-                    if dX < 0.1 and dY < 0.1 and dZ < 0.1:
+                    if dX < 0.2 and dY < 0.2 and dZ < 0.2:
                         # Multiple points that match suggest a better reading
                         self.bunches[i]['n'] += 1
                         # If this point is close enough to where another point is
@@ -114,8 +115,11 @@ class Collate:
                 if not found:
                     # Add this new point
                     self.bunches.append({'x':x, 'y':y, 'z':z, 'n':1, 'i':inten })
-        # Sorting them just in case we only want to publish the biggest x number of bunches
-        self.bunches = sorted(self.bunches, key=itemgetter('i'), reverse=False)
+        # Sorting them just in case we only want to publish the first or biggest x number of bunches
+        self.bunches = sorted(self.bunches, key=itemgetter('n', 'i'), reverse=True)
+        print(self.bunches)
+        print()
+
 
 ########
 # main #
