@@ -16,7 +16,7 @@
 
         <include file="$(find uol_cmp9767m_tutorial)/launch/topo_nav.launch">
                 <!-- Filename of the topological map. -->
-                <arg name="file" value="/home/ubuntu/ros_ws/src/andy_ass1/maps/test11.tmap2"/>
+                <arg name="file" value="/home/ubuntu/ros_ws/src/andy_ass1/maps/test12.tmap2"/>
         </include>
 
 
