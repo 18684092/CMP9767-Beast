@@ -153,17 +153,20 @@ class findBunches:
 
                     #define a point in camera coordinates
                     object_location = PoseStamped()
-                    object_location.header.frame_id = "thorvald_001/kinect2_" + self.camera + "_rgb_optical_frame"
+                    object_location.header.frame_id = self.camera_model.tfFrame() #"thorvald_001/kinect2_" + self.camera + "_rgb_optical_frame"
                     object_location.pose.orientation.w = 1
                     object_location.pose.position.x = camera_coords[0]
                     object_location.pose.position.y = camera_coords[1]
                     object_location.pose.position.z = camera_coords[2] 
                     # Try/except when debugging making a point cloud - shouldnt be needed
                     try:
-                        # print out the coordinates in the map frame
+                        # get the coordinates in the map frame
                         p_camera = self.tf_listener.transformPose('map', object_location)
-                        
-                        if "nan" not in str(p_camera.pose):
+
+                        # Depth can get confused by blocks / objects close to camera
+                        xL = p_camera.pose.position.y < -7 and p_camera.pose.position.y > -9
+                        print(p_camera.pose.position.y)
+                        if "nan" not in str(p_camera.pose) and xL:
                             p = Point32()
                             c = ChannelFloat32()
                             p.x = p_camera.pose.position.x
