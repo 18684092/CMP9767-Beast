@@ -44,7 +44,8 @@
         <node pkg="andy_ass1" name="cameraRight" type="camera.py">  
                 <param name="camera" value="right" type="string" />
         </node>
-        <!-- <node pkg="andy_ass1" name="cameraFront" type="camera.py">
+        <!--
+        <node pkg="andy_ass1" name="cameraFront" type="camera.py">
                 <param name="camera" value="front" type="string" />
         </node>
         -->
