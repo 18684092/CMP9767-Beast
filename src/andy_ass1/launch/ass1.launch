@@ -1,0 +1,56 @@
+<launch>
+
+        <!-- Launch the simulator demo as an include file -->
+        <include file="$(find bacchus_gazebo)/launch/vineyard_demo.launch">
+                <!-- Select a world -->
+                <arg name="world_name" default="vineyard_small_s4_coarse"/>
+                <!-- Select a map for topic /map -->
+                <arg name="nav_map_yaml" default="/home/ubuntu/ros_ws/src/andy_ass1/maps/vineyard.yaml" />
+                <!-- Load a predifined RVIZ config-->
+                <arg name="rviz_config_file" default="/home/ubuntu/ros_ws/src/andy_ass1/worlds/andy3.rviz"/> 
+                <!-- Load a modified Gazebo world with objects -->
+                <arg name="world" default="/home/ubuntu/ros_ws/src/andy_ass1/worlds/vineyard_blocks.world"/>
+
+                <arg name="gui" default="false"/>
+        </include>
+
+        <include file="$(find uol_cmp9767m_tutorial)/launch/topo_nav.launch">
+                <!-- Filename of the topological map. -->
+                <arg name="file" value="/home/ubuntu/ros_ws/src/andy_ass1/maps/test12.tmap2"/>
+        </include>
+
+
+
+        <!-- Publish aggregated object distance information around robot -->
+        <node pkg="andy_ass1" name="object_distance" type="object_distance.py" />
+
+        <!-- Publish object distance as pose -->
+        <node pkg="andy_ass1" name="object_distance_tf" type="object_distance_tf.py"  />
+                
+        <!-- Uses object distance to avoid obstacles and moves randomly 
+        <node pkg="andy_ass1" name="open_mover" type="open_move.py" ns="/thorvald_001" >
+                <param name="speed" value="0.6" type="string" /> 
+                <param name="distance" value="1.25" type="string" />
+        </node> -->
+
+        <!-- Information display -->
+        <node pkg="andy_ass1" name="main_display" type="main_display.py"  />
+
+        <!-- 3 Camera nodes to detect grapes from each camera using one script called multiple times
+        passing parameters to select which camera to use -->
+        <node pkg="andy_ass1" name="cameraLeft" type="camera.py">
+                <param name="camera" value="left" type="string" /> 
+        </node>
+        <node pkg="andy_ass1" name="cameraRight" type="camera.py">  
+                <param name="camera" value="right" type="string" />
+        </node>
+        <!--
+        <node pkg="andy_ass1" name="cameraFront" type="camera.py">
+                <param name="camera" value="front" type="string" />
+        </node>
+        -->
+
+        <!-- Node to collate grape bunches as a point cloud with intensity showing bunch size -->
+        <node pkg="andy_ass1" name="point_colation" type="point_colation.py"  /> 
+  
+</launch>
