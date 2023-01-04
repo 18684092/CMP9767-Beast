@@ -9,7 +9,7 @@
                 <!-- Load a predifined RVIZ config-->
                 <arg name="rviz_config_file" default="/home/ubuntu/ros_ws/src/andy_ass1/worlds/andy4.rviz"/> 
                 <!-- Load a modified Gazebo world with objects -->
-                <arg name="world" default="/home/ubuntu/ros_ws/src/andy_ass1/worlds/vineyard_blocks.world"/>
+                <arg name="world" default="/home/ubuntu/ros_ws/src/andy_ass1/worlds/vineyard_blocks2.world"/>
 
                 <!-- fake_localisation:=false for amcl -->
                 <arg name="fake_localisation" default="false"/>
@@ -18,15 +18,21 @@
                 <arg name="gui" default="false"/>
         </include>
 
-        <!-- Topological navigation - allows nodes to be added also -->
+        <!-- Topological navigation - allows nodes to be added also --> 
         <include file="$(find uol_cmp9767m_tutorial)/launch/topo_nav.launch">
-                <!-- Filename of the topological map. --> 
+                 <!-- Filename of the topological map. --> 
                 <arg name="file" value="/home/ubuntu/ros_ws/src/andy_ass1/maps/andy_new3.tmap2"/>
         </include>
-        
-        <!-- uol_cmp9767m_tutorial amcl.launch -->
-        <include file="$(find uol_cmp9767m_tutorial)/launch/amcl.launch">
 
+        <include file="$(find bacchus_move_base)/launch/corner_lasers_merger.launch">
+                <arg name="tf_prefix" value="thorvald_001/"/>
+        </include>
+
+        <!-- uol_cmp9767m_tutorial amcl.launch -->
+        <include file="$(find andy_ass1)/launch/amcl.launch" >
+
+        </include>
+        
         <!-- Publish aggregated object distance information around robot -->
         <node pkg="andy_ass1" name="object_distance" type="object_distance.py" />
 
