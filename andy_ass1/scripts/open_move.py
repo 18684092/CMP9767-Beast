@@ -1,5 +1,10 @@
+###################################
+# Author: Andy Perrett (18684092) #
+# Date  : 27th December 2022      #
+# Module: CMP9767                 #
+###################################
+
 # open_move.py
-# Moves until it sees green / brown grape vine
 # avoids objects
 
 import rospy

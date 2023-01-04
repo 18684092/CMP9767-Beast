@@ -1,3 +1,9 @@
+###################################
+# Author: Andy Perrett (18684092) #
+# Date  : 27th December 2022      #
+# Module: CMP9767                 #
+###################################
+
 # Rough and ready taken from lecture 9 slide code, although node array added and
 # edges added. TODO edges need to be inserted within node list but subprocess is
 # quick solution for now.
