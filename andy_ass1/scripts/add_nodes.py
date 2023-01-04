@@ -1,4 +1,4 @@
-# Rough and ready taken from lecture slide code, although node array added and
+# Rough and ready taken from lecture 9 slide code, although node array added and
 # edges added. TODO edges need to be inserted within node list but subprocess is
 # quick solution for now.
 
