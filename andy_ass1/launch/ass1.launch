@@ -11,19 +11,16 @@
                 <!-- Load a modified Gazebo world with objects -->
                 <arg name="world" default="/home/ubuntu/ros_ws/src/andy_ass1/worlds/vineyard_blocks.world"/>
 
-
+                <!-- false removes Gazebo GUI - speeds up -->
                 <arg name="gui" default="false"/>
         </include>
 
-        
-                <include file="$(find uol_cmp9767m_tutorial)/launch/topo_nav.launch">
+        <!-- Topological navigation - allows nodes to be added also -->
+        <include file="$(find uol_cmp9767m_tutorial)/launch/topo_nav.launch">
                 <!-- Filename of the topological map. --> 
                 <arg name="file" value="/home/ubuntu/ros_ws/src/andy_ass1/maps/andy_new3.tmap2"/>
         </include>
         
-
-
-
         <!-- Publish aggregated object distance information around robot -->
         <node pkg="andy_ass1" name="object_distance" type="object_distance.py" />
 
