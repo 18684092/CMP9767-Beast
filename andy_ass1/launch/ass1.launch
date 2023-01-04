@@ -7,7 +7,7 @@
                 <!-- Select a map for topic /map -->
                 <arg name="nav_map_yaml" default="/home/ubuntu/ros_ws/src/andy_ass1/maps/vineyard.yaml" />
                 <!-- Load a predifined RVIZ config-->
-                <arg name="rviz_config_file" default="/home/ubuntu/ros_ws/src/andy_ass1/worlds/andy3.rviz"/> 
+                <arg name="rviz_config_file" default="/home/ubuntu/ros_ws/src/andy_ass1/worlds/andy4.rviz"/> 
                 <!-- Load a modified Gazebo world with objects -->
                 <arg name="world" default="/home/ubuntu/ros_ws/src/andy_ass1/worlds/vineyard_blocks.world"/>
 
@@ -55,5 +55,8 @@
 
         <!-- Node to collate grape bunches as a point cloud with intensity showing bunch size -->
         <node pkg="andy_ass1" name="point_colation" type="point_colation.py"  /> 
+
+        <!-- Node to collate grape bunches as a point cloud with intensity showing bunch size -->
+        <node pkg="andy_ass1" name="grapevine" type="go_grapevine.py"  /> 
   
 </launch>
