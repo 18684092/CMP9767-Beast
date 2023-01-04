@@ -166,6 +166,8 @@ include_directories(
    scripts/main_display.py
    scripts/camera.py
    scripts/point_colation.py
+   scripts/go_grapevine.py
+   scripts/add_nodes.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
  )
 
