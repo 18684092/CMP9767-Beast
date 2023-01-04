@@ -1,3 +1,7 @@
+# Rough and ready taken from lecture slide code, although node array added and
+# edges added. TODO edges need to be inserted within node list but subprocess is
+# quick solution for now.
+
 import rospy
 import time
 from topological_navigation_msgs.srv import AddNode
@@ -6,13 +10,17 @@ import subprocess
 
 if __name__ == '__main__':
 
+    # deliberately delay so we can see nodes being added within RVIZ
     time.sleep(20)
 
+    # The list of nodes (x,y)
     nodes = [(-11,11),(-11,8), (-11,4), (-7,8), (-7,4), (-7.5, -2)]
 
+    # Wait then add
     rospy.wait_for_service('topological_map_manager2/add_topological_node')
     add_node_service = rospy.ServiceProxy('/topological_map_manager2/add_topological_node', AddNode)
 
+    # Loop can fail during testing if duplicate nodes added
     try:
         for i, p in enumerate(nodes):
             pose = Pose()
@@ -24,7 +32,7 @@ if __name__ == '__main__':
     except: 
         print("Failed")
 
- 
+    # Nasty but what the hell! Just demonstrating we can add edges 
     subprocess.run(["/opt/ros/noetic/bin/rosservice", "call", "/topological_map_manager2/add_edges_between_nodes", "{origin: 'waypoint1', destination: 'waypoint101', action: 'move_base', edge_id: 'waypoint1_waypoint101'}"])
     subprocess.run(["/opt/ros/noetic/bin/rosservice", "call", "/topological_map_manager2/add_edges_between_nodes", "{origin: 'waypoint101', destination: 'waypoint1', action: 'move_base', edge_id: 'waypoint101_waypoint1'}"])      
 
