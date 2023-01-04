@@ -235,7 +235,7 @@ class findBunches:
             print("Avg per bunch: ", int(self.num_labels/self.num_bunches) )
         except:
             pass
-
+        
         self.showImages()
 
     ##############
