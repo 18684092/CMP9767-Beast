@@ -56,7 +56,10 @@
         <!-- Node to collate grape bunches as a point cloud with intensity showing bunch size -->
         <node pkg="andy_ass1" name="point_colation" type="point_colation.py"  /> 
 
-        <!-- Node to collate grape bunches as a point cloud with intensity showing bunch size -->
+        <!-- Navigate to grapevine -->
         <node pkg="andy_ass1" name="grapevine" type="go_grapevine.py"  /> 
+
+        <!-- Programatically add nodes -->
+        <node pkg="andy_ass1" name="add_nodes" type="add_nodes.py"  /> 
   
 </launch>
