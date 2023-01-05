@@ -11,6 +11,7 @@ import cv2
 import numpy as np
 from std_msgs.msg import String
 from geometry_msgs.msg import Pose
+from topological_navigation_msgs.msg import GotoNodeActionGoal
 from math import sqrt
 import json
 
@@ -32,6 +33,8 @@ class Display:
         # Subscriber topics
         rospy.Subscriber("/thorvald_001/object_distance", String, self.callbackDistance)
         rospy.Subscriber("/thorvald_001/robot_pose", Pose, self.callbackPose)
+        
+        rospy.Subscriber("/thorvald_001/topological_navigation/goal", GotoNodeActionGoal, self.callbackGoal,queue_size=10)
 
         # Blank screen image
         self.img = np.zeros((512,512,3), np.uint8)
@@ -39,10 +42,10 @@ class Display:
         # Font stuff
         self.font                   = cv2.FONT_HERSHEY_SIMPLEX
         self.bottomLeft = (10,500)
-        self.fontScale              = 1
+        self.fontScale              = 0.5
         self.fontColor              = (255,255,255)  
         self.thickness              = 1
-        self.lineType               = 2
+        self.lineType               = cv2.LINE_AA
 
         # Are callbacks active? These both need to be true
         self.activeD = False
@@ -53,7 +56,8 @@ class Display:
         self.positionY = 0.0
         self.oldPositionX = 0.0
         self.oldPositionY = 0.0
-        self.positionZ = 0.0
+        self.orientationZ = 0.0
+        self.target = None
 
         # distance related
         self.distanceTravelled = 0
@@ -79,15 +83,41 @@ class Display:
         
 
     def addText(self):
-        cv2.putText(self.img, 'Hello World!', self.bottomLeft, self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
-        print("Travelled: ",self.distanceTravelled)
-        print(self.od)
+        self.img = np.zeros((512,512,3), np.uint8)
+        distance =     "Distance travelled: " + str(round(self.distanceTravelled,2)) + " m"
+        distanceCrow = "Distance from start: " + str(round(self.getDistanceCrow(),2)) + " m"
+        try:
+            oleft = "Closest object on left: " + str(round(float(self.od['left']),2)) + " m"
+            oright = "Closest object on right: " + str(round(float(self.od['right']),2)) + " m"
+            ofront = "Closest object on front: " + str(round(float(self.od['front']),2)) + " m"
+            oback = "Closest object on back: " + str(round(float(self.od['back']),2)) + " m"
+        except:
+            oleft = "Closest object: No data"
+            oright = oleft
+            oback = oleft
+            ofront = oleft
+        rpos = "Robot pose: x: " + str(round(self.positionX,2)) + " y: " + str(round(self.positionY,2)) + " rot: " + str(round(self.orientationZ,2)) 
+        target = "Topological goal: " + str(self.target)
+        cv2.putText(self.img, distance, (10,35), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, distanceCrow, (10,50), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, oleft, (10,65), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, oright, (10,80), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, ofront, (10,95), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, oback, (10,110), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, rpos, (10,125), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, target, (10,140), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
 
     #############
     # kmToMiles # 
     #############
     def kmToMiles(self, metres):
         return (metres / 1000) * 0.621371
+
+    def callbackGoal(self, data):
+        self.target = data.goal.target
+
+        
+
 
     ################
     # callbackPose #
@@ -97,9 +127,9 @@ class Display:
         # NOTE x and Y are reversed - why - is world rotated?
         self.oldPositionX = self.positionX
         self.oldPositionY = self.positionY
-        self.positionX = data.position.y
-        self.positionY = data.position.x
-        self.positionZ = data.position.z
+        self.positionX = data.position.x
+        self.positionY = data.position.y
+        self.orientationZ = data.orientation.z
         
         if not self.activeP:
             self.initialPosition = (self.positionX, self.positionY)
