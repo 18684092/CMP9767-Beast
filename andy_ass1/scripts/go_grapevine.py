@@ -12,7 +12,7 @@ from topological_navigation_msgs.msg import GotoNodeAction, GotoNodeGoal
 
 # Waypoints
 nodeList = [1, 3, 4, 105,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 1, 105]
-
+row = {10:1, 11:1, 12:1, 13:1, 14:1, 15:1, 16:1, 17:1, 18:1, 21:2, 22:2, 23:2, 24:2, 25:2, 26:2, 27:2, 28:2, 29:2}
 # The first few node traversals are to allow AMCL to localise, after that goto the grapevine and
 # pause for each image
 
@@ -32,6 +32,7 @@ class Move():
         self.client.wait_for_server()
         self.move = rospy.Publisher('/thorvald_001/moving', String, queue_size=1, latch=True)
         self.state = rospy.Publisher('/thorvald_001/state', String, queue_size=1, latch=True)
+        self.row = rospy.Publisher('/thorvald_001/row', String, queue_size=10, latch=True)
         rospy.Subscriber("/thorvald_001/camera_done", String, self.callback)
 
         self.goGrapes()
@@ -58,6 +59,8 @@ class Move():
             # If we are at a grapevine node and normal operation
             if result.success == True and ((wp >= 10 and wp <= 18) or (wp >= 21 and wp <= 29)):
                 self.move.publish(String('false'))
+                # Publish the row number
+                self.row.publish((String("row" + str(row[wp]))))
                 # wait for camera node to finish
                 self.cameraResult = "imaging"
                 while self.cameraResult == "imaging":

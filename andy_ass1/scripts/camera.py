@@ -10,6 +10,7 @@ from sensor_msgs.msg import Image, CameraInfo, PointCloud, ChannelFloat32
 from geometry_msgs.msg import PoseStamped, PoseArray, Pose, Point, Point32
 import numpy as np
 from std_msgs.msg import String
+import json
 
 # Import OpenCV libraries and tools
 import cv2
@@ -34,7 +35,8 @@ class findBunches:
         self.num_labels = 0
 
         self.moving = "true"
-
+        self.row = ''
+        self.rowMinMax = {"row1": {"min": 11, "max": -11}, "row2": {"min": 11, "max": -11}}
         # Stores various images
         self.cv_image = None
         self.orig_image = None
@@ -59,7 +61,9 @@ class findBunches:
         rospy.Subscriber("/thorvald_001/kinect2_" + camera + "_sensor/sd/image_depth_rect", Image, self.image_depth_callback)
 
         rospy.Subscriber("/thorvald_001/moving", String, self.callback_moving)
+        rospy.Subscriber("/thorvald_001/row", String, self.callback_row)
         self.move = rospy.Publisher('/thorvald_001/camera_done', String, queue_size=1, latch=True)
+        self.widths = rospy.Publisher('/thorvald_001/row_widths', String, queue_size=10, latch=True)
         
         # Publish a pointcloud - NOTE - intensities are own format and not compatible with RVIZ
         # but these get changed and made compatible by collate_point.py ready for RVIZ.
@@ -67,8 +71,10 @@ class findBunches:
 
     def callback_moving(self, data):
         self.moving = data.data
-        pass
-
+       
+    def callback_row(self, data):
+        self.row = str(data.data)
+       
     ########################
     # camera_info_callback #
     ########################
@@ -128,12 +134,15 @@ class findBunches:
     # Taken from https://pyimagesearch.com/2016/02/01/opencv-center-of-contour/
     # https://docs.opencv.org/4.x/dd/d49/tutorial_py_contour_features.html
     def getPositions(self):
-        
+        rMin = self.rowMinMax[self.row]['min']
+        rMax = self.rowMinMax[self.row]['max']
+        thisMin = 11
+        thisMax = -11
         pc = PointCloud()
         pc.header.frame_id = "map"
         cnts = cv2.findContours(self.erosion, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = cnts[0] if len(cnts) == 2 else cnts[1]
-        min_area = 250
+        min_area = 350
         self.num_bunches = 0
         for c in cnts:
             M = cv2.moments(c)
@@ -174,7 +183,7 @@ class findBunches:
                         p_camera = self.tf_listener.transformPose('map', object_location)
 
                         # Depth can get confused by blocks / objects close to camera
-                        xL = p_camera.pose.position.y < -7 and p_camera.pose.position.y > -9
+                        xL = p_camera.pose.position.y < -6 and p_camera.pose.position.y > -9
                         #print(p_camera.pose.position.y)
                         if "nan" not in str(p_camera.pose) and xL:
                             p = Point32()
@@ -182,10 +191,19 @@ class findBunches:
                             p.x = p_camera.pose.position.x
                             p.y = p_camera.pose.position.y
                             p.z = p_camera.pose.position.z
-                            pc.points.append(p)
-                            c.name = "intensity"
-                            c.values = (area * depth_value, area * depth_value, area * depth_value)
-                            pc.channels.append(c)
+                            mini = p.x < rMin
+                            maxi = p.x > rMax 
+                            if mini or maxi:
+                                if mini:
+                                    if p.x < thisMin:
+                                        thisMin = p.x
+                                if maxi:
+                                    if p.x > thisMax:
+                                        thisMax = p.x
+                                pc.points.append(p)
+                                c.name = "intensity"
+                                c.values = (area * depth_value, area * depth_value, area * depth_value)
+                                pc.channels.append(c)
                     # Shouldn't get here NOTE and we don't appear to, ever        
                     except Exception as e:
                         print("ar crap", e)
@@ -194,7 +212,11 @@ class findBunches:
                     cv2.circle(self.orig_image, (cX, cY), 7, (0, 0, 255), -1)
         # Publish the point cloud
         self.object_location_pub2.publish(pc)
-        
+        if thisMin < self.rowMinMax[self.row]['min']:
+            self.rowMinMax[self.row]['min'] = thisMin
+        if thisMax > self.rowMinMax[self.row]['max']:
+            self.rowMinMax[self.row]['max'] = thisMax    
+        self.widths.publish(String(json.dumps(self.rowMinMax)))            
 
     ##################
     # image_callback #

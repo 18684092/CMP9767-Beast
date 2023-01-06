@@ -44,7 +44,8 @@ class Display:
         rospy.Subscriber("/thorvald_001/camera_done", String, self.callbackCamera)
         rospy.Subscriber("/thorvald_001/state", String, self.callbackState)
 
-        bunches = rospy.Subscriber('/thorvald_001/grape_bunches', PointCloud, self.grapes_callback)
+        rospy.Subscriber('/thorvald_001/grape_bunches', PointCloud, self.grapes_callback)
+        rospy.Subscriber('/thorvald_001/row_widths', String, self.callbackWidths)
 
         # Blank screen image
         self.img = np.zeros((512,512,3), np.uint8)
@@ -80,6 +81,11 @@ class Display:
 
         self.numberBunches = 0
         self.numberGrapes = 0
+        self.widths = {}
+
+    def callbackWidths(self, data):
+        self.widths = json.loads(data.data)
+        print(self.widths)
 
     def callbackState(self, data):
         self.state = data.data
@@ -137,7 +143,19 @@ class Display:
         hours, rem = divmod(self.end - self.start, 3600)
         minutes, seconds = divmod(rem, 60)
         timing = "Time taken: {:0>2} mins {:05.2f} seconds".format(int(minutes),seconds)
-
+        
+        try:
+            widths1 = abs(float(self.widths['row1']['min'])) +  abs(float(self.widths['row1']['max']))
+            widths2 = abs(float(self.widths['row2']['min'])) +  abs(float(self.widths['row2']['max']))
+            gWidth1 = "Grapevine near length: " + str(round(widths1,2)) + " m"
+            gWidth2 = "Grapevine far length: " + str(round(widths2,2)) + " m"
+            avgWidth = (widths1 + widths2) / 2
+            bunchMetre = "Average bunches per metre: " + str(round(self.numberBunches / avgWidth, 1))
+        except:
+            gWidth1 = "Grapevine near length: 0 m"
+            gWidth2 = "Grapevine far length: 0 m"
+            avgWidth = 0
+            bunchMetre = "Average bunches per metre: 0"
         cv2.putText(self.img, state, (10,15), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, distance, (10,45), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, distanceCrow, (10,60), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
@@ -151,7 +169,13 @@ class Display:
         cv2.putText(self.img, camera, (10,200), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
 
         cv2.putText(self.img, bunches, (10,235), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
-        cv2.putText(self.img, timing, (10,270), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, gWidth1, (10,250), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, gWidth2, (10,265), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, bunchMetre, (10,280), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, timing, (10,315), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+
+
+
 
     #############
     # kmToMiles # 
