@@ -78,7 +78,6 @@ class Display:
     # drawScreen #
     ##############
     def drawScreen(self):
-
         cv2.imshow("AndyAss1",self.img)
         
 
