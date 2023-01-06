@@ -72,8 +72,12 @@ class Display:
         self.moving = "false"
         self.camera = "not imaging"
 
-    def grapes_callback(self, data):
-        pass
+        self.numberBunches = 0
+        self.numberGrapes = 0
+
+
+    def grapes_callback(self, pc):
+        self.numberBunches = len(pc.points)
 
     def callbackMoving(self, data):
         self.moving = data.data
@@ -116,6 +120,7 @@ class Display:
         target = "Topological goal: " + str(self.target)
         moving = "Robot moving: " + str(self.moving)
         camera = "Camera state: " + str(self.camera)
+        bunches = "Bunches of grapes: " + str(self.numberBunches)
         cv2.putText(self.img, distance, (10,35), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, distanceCrow, (10,50), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, oleft, (10,65), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
@@ -126,6 +131,8 @@ class Display:
         cv2.putText(self.img, target, (10,160), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, moving, (10,175), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, camera, (10,190), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+
+        cv2.putText(self.img, bunches, (10,225), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
 
     #############
     # kmToMiles # 
