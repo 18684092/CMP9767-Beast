@@ -12,6 +12,7 @@ import numpy as np
 from std_msgs.msg import String
 from geometry_msgs.msg import Pose
 from topological_navigation_msgs.msg import GotoNodeActionGoal
+from sensor_msgs.msg import PointCloud
 from math import sqrt
 import json
 
@@ -35,6 +36,10 @@ class Display:
         rospy.Subscriber("/thorvald_001/robot_pose", Pose, self.callbackPose)
         
         rospy.Subscriber("/thorvald_001/topological_navigation/goal", GotoNodeActionGoal, self.callbackGoal,queue_size=10)
+        rospy.Subscriber("/thorvald_001/moving", String, self.callbackMoving)
+        rospy.Subscriber("/thorvald_001/camera_done", String, self.callbackCamera)
+
+        bunches = rospy.Subscriber('/thorvald_001/grape_bunches', PointCloud, self.grapes_callback)
 
         # Blank screen image
         self.img = np.zeros((512,512,3), np.uint8)
@@ -63,6 +68,18 @@ class Display:
         self.distanceTravelled = 0
         self.initialPosition = (0.0, 0.0)
         self.od = {}
+
+        self.moving = "false"
+        self.camera = "not imaging"
+
+    def grapes_callback(self, data):
+        pass
+
+    def callbackMoving(self, data):
+        self.moving = data.data
+
+    def callbackCamera(self, data):
+        self.camera = data.data
 
     ##########
     # active #
@@ -97,6 +114,8 @@ class Display:
             ofront = oleft
         rpos = "Robot pose: x: " + str(round(self.positionX,2)) + " y: " + str(round(self.positionY,2)) + " rot: " + str(round(self.orientationZ,2)) 
         target = "Topological goal: " + str(self.target)
+        moving = "Robot moving: " + str(self.moving)
+        camera = "Camera state: " + str(self.camera)
         cv2.putText(self.img, distance, (10,35), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, distanceCrow, (10,50), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, oleft, (10,65), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
@@ -104,7 +123,9 @@ class Display:
         cv2.putText(self.img, ofront, (10,95), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, oback, (10,110), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, rpos, (10,125), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
-        cv2.putText(self.img, target, (10,140), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, target, (10,160), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, moving, (10,175), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, camera, (10,190), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
 
     #############
     # kmToMiles # 

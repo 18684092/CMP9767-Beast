@@ -68,7 +68,7 @@ class Collate:
         for i, pointDict in enumerate(self.bunches):
             if i > 400: break
             # Each point must have been seen x times to show its a reliable point - (needs to be a particle filter)
-            if pointDict['n'] > 4:
+            if pointDict['n'] > 0:
                 p = Point32()
                 intensities.append(pointDict['i'])
                 p.x = pointDict['x']

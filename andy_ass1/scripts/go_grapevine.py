@@ -26,7 +26,7 @@ class Move():
     ############
     def __init__(self, nodes):
 
-        self.cameraResult = ''
+        self.cameraResult = 'imaging'
 
         self.client = actionlib.SimpleActionClient('/thorvald_001/topological_navigation', GotoNodeAction)
         self.client.wait_for_server()
@@ -46,10 +46,15 @@ class Move():
             self.client.send_goal(goal)
             status = self.client.wait_for_result()
             result = self.client.get_result()
+
             # If we are at a grapevine node and normal operation
-            if result == True and ((wp >= 10 and wp <= 18) or (wp >= 21 and wp <= 29)):
+            if result.success == True and ((wp >= 10 and wp <= 18) or (wp >= 21 and wp <= 29)):
                 self.move.publish(String('false'))
                 # wait for camera node to finish
+                self.cameraResult = "imaging"
+                while self.cameraResult == "imaging":
+                    pass
+
 
     ############
     # callback #
@@ -65,7 +70,7 @@ def main():
     rospy.init_node('topological_navigation_client', anonymous=True)
 
     move = Move(nodeList)
-
+    rate = rospy.Rate(10)
     while not rospy.is_shutdown():     
         rate.sleep()
 

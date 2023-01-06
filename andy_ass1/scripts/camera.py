@@ -9,6 +9,7 @@ import roslib, rospy, image_geometry, tf
 from sensor_msgs.msg import Image, CameraInfo, PointCloud, ChannelFloat32
 from geometry_msgs.msg import PoseStamped, PoseArray, Pose, Point, Point32
 import numpy as np
+from std_msgs.msg import String
 
 # Import OpenCV libraries and tools
 import cv2
@@ -32,6 +33,8 @@ class findBunches:
         self.num_bunches = 0
         self.num_labels = 0
 
+        self.moving = "true"
+
         # Stores various images
         self.cv_image = None
         self.orig_image = None
@@ -54,10 +57,17 @@ class findBunches:
         sub_image = rospy.Subscriber("/thorvald_001/kinect2_" + self.camera + "_camera/hd/image_color_rect", Image, self.image_callback)
         self.camera_info_sub = rospy.Subscriber('/thorvald_001/kinect2_' + camera + '_camera/hd/camera_info', CameraInfo, self.camera_info_callback)
         rospy.Subscriber("/thorvald_001/kinect2_" + camera + "_sensor/sd/image_depth_rect", Image, self.image_depth_callback)
+
+        rospy.Subscriber("/thorvald_001/moving", String, self.callback_moving)
+        self.move = rospy.Publisher('/thorvald_001/camera_done', String, queue_size=1, latch=True)
         
         # Publish a pointcloud - NOTE - intensities are own format and not compatible with RVIZ
         # but these get changed and made compatible by collate_point.py ready for RVIZ.
         self.object_location_pub2 = rospy.Publisher('/thorvald_001/grapes_'+camera, PointCloud, queue_size=1)
+
+    def callback_moving(self, data):
+        self.moving = data.data
+        pass
 
     ########################
     # camera_info_callback #
@@ -165,7 +175,7 @@ class findBunches:
 
                         # Depth can get confused by blocks / objects close to camera
                         xL = p_camera.pose.position.y < -7 and p_camera.pose.position.y > -9
-                        print(p_camera.pose.position.y)
+                        #print(p_camera.pose.position.y)
                         if "nan" not in str(p_camera.pose) and xL:
                             p = Point32()
                             c = ChannelFloat32()
@@ -195,6 +205,11 @@ class findBunches:
         Find contours of blobs, find centroids of contours,
         publish their position with respect to map.
         '''
+
+        if self.moving == "true": return
+
+        self.move.publish(String('imaging'))
+
         # Image is BGR
         self.cv_image = self.bridge.imgmsg_to_cv2(img_msg, "passthrough")
         self.image_depth = self.bridge.imgmsg_to_cv2(self.image_depth_ros, "32FC1")
@@ -236,7 +251,9 @@ class findBunches:
         except:
             pass
         
+        self.move.publish(String('not imaging'))
         self.showImages()
+
 
     ##############
     # showImages #
@@ -248,7 +265,7 @@ class findBunches:
             #self.show_image(self.erosion, "Eroded")
         if self.num_labels > 20:
             self.show_image(self.labeled_image, self.camera + " Grapes")
-        cv2.waitKey(1)
+        cv2.waitKey(25)
 
 ########
 # main #
@@ -258,7 +275,7 @@ def main():
     try:
         camera = rospy.get_param('~camera')
     except:
-        camera = 'right' 
+        camera = 'left' 
     bunch = findBunches(camera)
     rate = rospy.Rate(100)
     while not rospy.is_shutdown():     
