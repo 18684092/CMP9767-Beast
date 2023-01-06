@@ -104,7 +104,7 @@ class Collate:
                     dY = abs(abs(sY) - abs(y))
                     dZ = abs(abs(sZ) - abs(z))
                     # Crude filter to group noisy point clouds - not effective really
-                    if dX < 0.3 and dY < 0.3 and dZ < 0.3:
+                    if dX < 0.2 and dY < 0.2 and dZ < 0.2:
                         # Multiple points that match suggest a better reading
                         self.bunches[i]['n'] += 1
                         # If this point is close enough to where another point is

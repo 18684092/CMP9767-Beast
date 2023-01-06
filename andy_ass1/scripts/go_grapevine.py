@@ -31,6 +31,7 @@ class Move():
         self.client = actionlib.SimpleActionClient('/thorvald_001/topological_navigation', GotoNodeAction)
         self.client.wait_for_server()
         self.move = rospy.Publisher('/thorvald_001/moving', String, queue_size=1, latch=True)
+        self.state = rospy.Publisher('/thorvald_001/state', String, queue_size=1, latch=True)
         rospy.Subscriber("/thorvald_001/camera_done", String, self.callback)
 
         self.goGrapes()
@@ -39,7 +40,14 @@ class Move():
     # goGrapes #
     ############
     def goGrapes(self):
-        for wp in nodeList:
+        for i, wp in enumerate(nodeList):
+            if i >=0 and i < 5:
+                self.state.publish(String('Localising position'))
+            if i >=5 and i <26:
+                self.state.publish(String('Counting bunches of grapes'))
+            if i >=26:
+                self.state.publish(String('Returning home'))
+
             self.move.publish(String('true'))
             goal = GotoNodeGoal()
             goal.target = "waypoint" + str(wp)
@@ -54,6 +62,7 @@ class Move():
                 self.cameraResult = "imaging"
                 while self.cameraResult == "imaging":
                     pass
+        self.state.publish(String('Finished'))
 
 
     ############

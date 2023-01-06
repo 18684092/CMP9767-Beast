@@ -15,6 +15,7 @@ from topological_navigation_msgs.msg import GotoNodeActionGoal
 from sensor_msgs.msg import PointCloud
 from math import sqrt
 import json
+import time
 
 ###########
 # Display #
@@ -30,6 +31,9 @@ class Display:
     ########
     def __init__(self):
 
+        self.start = time.time()
+        self.end = time.time()
+
         # Setup all subscribers
         # Subscriber topics
         rospy.Subscriber("/thorvald_001/object_distance", String, self.callbackDistance)
@@ -38,6 +42,7 @@ class Display:
         rospy.Subscriber("/thorvald_001/topological_navigation/goal", GotoNodeActionGoal, self.callbackGoal,queue_size=10)
         rospy.Subscriber("/thorvald_001/moving", String, self.callbackMoving)
         rospy.Subscriber("/thorvald_001/camera_done", String, self.callbackCamera)
+        rospy.Subscriber("/thorvald_001/state", String, self.callbackState)
 
         bunches = rospy.Subscriber('/thorvald_001/grape_bunches', PointCloud, self.grapes_callback)
 
@@ -71,10 +76,13 @@ class Display:
 
         self.moving = "false"
         self.camera = "not imaging"
+        self.state = 'Initialising'
 
         self.numberBunches = 0
         self.numberGrapes = 0
 
+    def callbackState(self, data):
+        self.state = data.data
 
     def grapes_callback(self, pc):
         self.numberBunches = len(pc.points)
@@ -121,18 +129,29 @@ class Display:
         moving = "Robot moving: " + str(self.moving)
         camera = "Camera state: " + str(self.camera)
         bunches = "Bunches of grapes: " + str(self.numberBunches)
-        cv2.putText(self.img, distance, (10,35), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
-        cv2.putText(self.img, distanceCrow, (10,50), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
-        cv2.putText(self.img, oleft, (10,65), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
-        cv2.putText(self.img, oright, (10,80), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
-        cv2.putText(self.img, ofront, (10,95), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
-        cv2.putText(self.img, oback, (10,110), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
-        cv2.putText(self.img, rpos, (10,125), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
-        cv2.putText(self.img, target, (10,160), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
-        cv2.putText(self.img, moving, (10,175), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
-        cv2.putText(self.img, camera, (10,190), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        state = "Control state: " + str(self.state)
+        if str(self.state) != "Finished":
+            self.end = time.time()
 
-        cv2.putText(self.img, bunches, (10,225), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        # time formatting taken from https://stackoverflow.com/questions/27779677/how-to-format-elapsed-time-from-seconds-to-hours-minutes-seconds-and-milliseco
+        hours, rem = divmod(self.end - self.start, 3600)
+        minutes, seconds = divmod(rem, 60)
+        timing = "Time taken: {:0>2} mins {:05.2f} seconds".format(int(minutes),seconds)
+
+        cv2.putText(self.img, state, (10,15), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, distance, (10,45), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, distanceCrow, (10,60), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, oleft, (10,75), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, oright, (10,90), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, ofront, (10,105), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, oback, (10,120), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, rpos, (10,135), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, target, (10,170), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, moving, (10,185), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, camera, (10,200), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+
+        cv2.putText(self.img, bunches, (10,235), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, timing, (10,270), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
 
     #############
     # kmToMiles # 
