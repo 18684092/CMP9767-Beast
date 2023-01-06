@@ -16,8 +16,14 @@ nodeList = [1, 3, 4, 105,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22
 # The first few node traversals are to allow AMCL to localise, after that goto the grapevine and
 # pause for each image
 
+########
+# Move #
+########
 class Move():
 
+    ############
+    # __init__ #
+    ############
     def __init__(self, nodes):
 
         self.cameraResult = ''
@@ -29,6 +35,9 @@ class Move():
 
         self.goGrapes()
 
+    ############
+    # goGrapes #
+    ############
     def goGrapes(self):
         for wp in nodeList:
             self.move.publish(String('true'))
@@ -42,11 +51,16 @@ class Move():
                 self.move.publish(String('false'))
                 # wait for camera node to finish
 
+    ############
+    # callback #
+    ############
     def callback(self, data):
         self.cameraResult = data
         print(self.cameraResult)
 
-
+########
+# main #
+########
 def main():
     rospy.init_node('topological_navigation_client', anonymous=True)
 
@@ -55,5 +69,6 @@ def main():
     while not rospy.is_shutdown():     
         rate.sleep()
 
+# Start properly
 if __name__ == '__main__':
     main()
