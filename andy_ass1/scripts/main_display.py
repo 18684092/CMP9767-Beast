@@ -68,6 +68,7 @@ class Display:
         self.oldPositionX = 0.0
         self.oldPositionY = 0.0
         self.orientationZ = 0.0
+
         self.target = None
 
         # distance related
@@ -131,6 +132,7 @@ class Display:
             oback = oleft
             ofront = oleft
         rpos = "Robot pose: x: " + str(round(self.positionX,2)) + " y: " + str(round(self.positionY,2)) + " rot: " + str(round(self.orientationZ,2)) 
+
         target = "Topological goal: " + str(self.target)
         moving = "Robot moving: " + str(self.moving)
         camera = "Camera state: " + str(self.camera)
@@ -145,15 +147,13 @@ class Display:
         timing = "Time taken: {:0>2} mins {:05.2f} seconds".format(int(minutes),seconds)
         
         try:
-            widths1 = abs(float(self.widths['row1']['min'])) +  abs(float(self.widths['row1']['max']))
-            widths2 = abs(float(self.widths['row2']['min'])) +  abs(float(self.widths['row2']['max']))
-            gWidth1 = "Grapevine near length: " + str(round(widths1,2)) + " m"
-            gWidth2 = "Grapevine far length: " + str(round(widths2,2)) + " m"
-            avgWidth = (widths1 + widths2) / 2
-            bunchMetre = "Average bunches per metre: " + str(round(self.numberBunches / avgWidth, 1))
+            widths1 = abs(min(float(self.widths['row1']['min']) ,  float(self.widths['row2']['min'])))
+            widths2 = abs(max(float(self.widths['row1']['max']) ,  float(self.widths['row2']['max'])))
+            gWidth1 = "Grapevine length: " + str(round(widths1 + widths2, 2)) + " m"
+ 
+            bunchMetre = "Average bunches per metre: " + str(round(self.numberBunches / (widths1 + widths2), 1))
         except:
-            gWidth1 = "Grapevine near length: 0 m"
-            gWidth2 = "Grapevine far length: 0 m"
+            gWidth1 = "Grapevine length: 0 m"
             avgWidth = 0
             bunchMetre = "Average bunches per metre: 0"
         cv2.putText(self.img, state, (10,15), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
@@ -164,13 +164,14 @@ class Display:
         cv2.putText(self.img, ofront, (10,105), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, oback, (10,120), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, rpos, (10,135), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+
         cv2.putText(self.img, target, (10,170), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, moving, (10,185), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, camera, (10,200), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
 
         cv2.putText(self.img, bunches, (10,235), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, gWidth1, (10,250), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
-        cv2.putText(self.img, gWidth2, (10,265), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+
         cv2.putText(self.img, bunchMetre, (10,280), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, timing, (10,315), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
 
@@ -186,7 +187,6 @@ class Display:
     def callbackGoal(self, data):
         self.target = data.goal.target
 
-        
 
 
     ################
@@ -194,7 +194,6 @@ class Display:
     ################
     def callbackPose(self, data):
         ''' Listens for pose data '''
-        # NOTE x and Y are reversed - why - is world rotated?
         self.oldPositionX = self.positionX
         self.oldPositionY = self.positionY
         self.positionX = data.position.x
