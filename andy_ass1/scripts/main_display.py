@@ -147,9 +147,10 @@ class Display:
         timing = "Time taken: {:0>2} mins {:05.2f} seconds".format(int(minutes),seconds)
         
         try:
-            widths1 = abs(min(float(self.widths['row1']['min']) ,  float(self.widths['row2']['min'])))
-            widths2 = abs(max(float(self.widths['row1']['max']) ,  float(self.widths['row2']['max'])))
-            gWidth1 = "Grapevine length: " + str(round(widths1 + widths2, 2)) + " m"
+            widths1 = min(float(self.widths['row1']['min']) ,  float(self.widths['row2']['min']))
+            widths2 = max(float(self.widths['row1']['max']) ,  float(self.widths['row2']['max']))
+           
+            gWidth1 = "Grapevine length: " + str(round(abs(widths1) + widths2 + 0.6 , 2)) + " m"
  
             bunchMetre = "Average bunches per metre: " + str(round(self.numberBunches / (widths1 + widths2), 1))
         except:

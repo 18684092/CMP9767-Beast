@@ -49,7 +49,7 @@
         <node pkg="andy_ass1" name="main_display" type="main_display.py"  />
 
         <!-- 3 Camera nodes to detect grapes from each camera using one script called multiple times
-        passing parameters to select which camera to use 
+        passing parameters to select which camera to use -->
         <node pkg="andy_ass1" name="cameraLeft" type="camera.py">
                 <param name="camera" value="left" type="string" /> 
         </node> -->

@@ -35,7 +35,6 @@ class findBunches:
         self.num_bunches = 0
         self.num_labels = 0
         self.iNum = 0
-        self.grandTotalBunches = 0
 
         self.moving = "true"
         self.row = ''
@@ -149,7 +148,7 @@ class findBunches:
         pc.header.frame_id = "map"
         cnts = cv2.findContours(self.erosion, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = cnts[0] if len(cnts) == 2 else cnts[1]
-        min_area = 250
+        min_area = 50
         self.num_bunches = 0
         for c in cnts:
             M = cv2.moments(c)
@@ -158,7 +157,6 @@ class findBunches:
             area = cv2.contourArea(c)
             if area > min_area:
                 self.num_bunches += 1
-                self.grandTotalBunches += 1
                 self.bunches.append(c)
                 cv2.drawContours(self.orig_image, [c], -1, (0,0,255), 2)
                 x,y,w,h = cv2.boundingRect(c)
@@ -171,9 +169,8 @@ class findBunches:
                 aY = []
                 aZ = []
                 try:
-                    for i,v in enumerate([(-1,-1), (-1,0), (-1,1), (0, 0), (0, -1), (0, 1), (1,-1), (1,0), (1,1), (-2,-2), (-2,-1), (-2, 0), (-2,1), (-2,2), (-1,-2), (0,-2), (1,-2), (2,-2), (2,-1), (2,0), (2,1), (2,2), (1,2), (0,2),(-1,2)
-                        , (-3,-3), (-3, -2), (-3,-1), (-3,0), (-3,1), (-3,2), (-3,3), (-2,-3), (-2,3), (-1,-3), (-1,3), (0,-3), (0,3),(1,-3), (1,3), (2,-3), (2,3), (3,-3),(3,-2),(3,-1),(3,0),(3,1),(3,2),(3,3)]):
-                     
+                    for i,v in enumerate([(-1,-1), (-1,0), (-1,1), (0, 0), (0, -1), (0, 1), (1,-1), (1,0), (1,1), (-2,-2), (-2,-1), (-2, 0), (-2,1), (-2,2), (-1,-2), (0,-2), (1,-2), (2,-2), (2,-1), (2,0), (2,1), (2,2), (1,2), (0,2),(-1,2), (-3,-3), (-3, -2), (-3,-1), (-3,0), (-3,1), (-3,2), (-3,3), (-2,-3), (-2,3), (-1,-3), (-1,3), (0,-3), (0,3),(1,-3), (1,3), (2,-3), (2,3), (3,-3),(3,-2),(3,-1),(3,0),(3,1),(3,2),(3,3)]):
+
                         # The depth array is smaller than the original colour image
                         depth_coords = (self.image_depth.shape[0] / 2 + ((cY+v[0]) - self.orig_image.shape[0] / 2) * self.color2depth_aspect, 
                             self.image_depth.shape[1] / 2 + ((cX+v[1]) - self.orig_image.shape[1] / 2) * self.color2depth_aspect)
@@ -182,24 +179,26 @@ class findBunches:
                         depth_value = self.image_depth[int(depth_coords[0]), int(depth_coords[1])] # you might need to do some boundary checking first!
 
                         # calculate object's 3d location in camera coords
-                        camera_coords = self.camera_model.projectPixelTo3dRay((cX+v[1], cY+v[0])) #project the image coords (x,y) into 3D ray in camera coords 
+                        camera_coords = self.camera_model.projectPixelTo3dRay((cX, cY)) #project the image coords (x,y) into 3D ray in camera coords 
                         camera_coords = [x/camera_coords[2] for x in camera_coords] # adjust the resulting vector so that z = 1
                         camera_coords = [x*depth_value for x in camera_coords] # multiply the vector by depth
                         aX.append(camera_coords[0])
                         aY.append(camera_coords[1])
                         aZ.append(camera_coords[2])
 
-                    
+                    print("deptg")
                     # any depth that is more than 0.2m away from average - delete
-                    for i, v in enumerate(aZ):
-                        if math.isnan(float(v)):
+                    i = 0
+                    while i < len(aZ):
+                        if math.isnan(float(aZ[i])):
                             print("Odd Z", aX[i], aY[i], aZ[i])
                             del aZ[i]
                             del aX[i]
                             del aY[i]
+                            print(len(aZ))
+                        i += 1
 
                     avg = sum(aZ) / len(aZ)
-
 
                     xx = 0
                     yy = 0
@@ -265,9 +264,9 @@ class findBunches:
         # Publish the point cloud
         self.object_location_pub2.publish(pc)
         if thisMin < self.rowMinMax[self.row]['min']:
-            self.rowMinMax[self.row]['min'] = thisMin + 0.2
+            self.rowMinMax[self.row]['min'] = thisMin + 0.3
         if thisMax > self.rowMinMax[self.row]['max']:
-            self.rowMinMax[self.row]['max'] = thisMax - 0.2   
+            self.rowMinMax[self.row]['max'] = thisMax - 0.3  
         self.widths.publish(String(json.dumps(self.rowMinMax)))            
 
     ##################
@@ -328,7 +327,7 @@ class findBunches:
         self.move.publish(String('not imaging'))
         self.showImages()
         self.iNum += 1
-        print("Grand total bunches", self.grandTotalBunches)
+
 
 
     ##############
@@ -338,7 +337,7 @@ class findBunches:
         
         if self.num_bunches > 0:
             self.show_image(self.orig_image, self.camera)
-            cv2.imwrite(self.row+"_"+str(self.iNum)+"_"+self.camera+".jpg", self.orig_image)
+            cv2.imwrite("/home/ubuntu/ros_ws/src/andy_ass1/images/"+self.row+"_"+str(self.iNum)+"_"+self.camera+".jpg", self.orig_image)
             #self.show_image(self.erosion, "Eroded")
         if self.num_labels > 20:
             self.show_image(self.labeled_image, self.camera + " Grapes")
