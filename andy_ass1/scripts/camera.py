@@ -148,6 +148,8 @@ class findBunches:
         pc.header.frame_id = "map"
         cnts = cv2.findContours(self.erosion, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = cnts[0] if len(cnts) == 2 else cnts[1]
+
+        # Rather arbitary area, small enough to catch almost totally occluded bunches, big enough not to see rouge pixel colours as a bunch 
         min_area = 50
         self.num_bunches = 0
         for c in cnts:
@@ -175,8 +177,6 @@ class findBunches:
                         depth_coords = (self.image_depth.shape[0] / 2 + ((cY+v[0]) - self.orig_image.shape[0] / 2) * self.color2depth_aspect, 
                             self.image_depth.shape[1] / 2 + ((cX+v[1]) - self.orig_image.shape[1] / 2) * self.color2depth_aspect)
 
-                        if cY /2 > 511:
-                            continue
 
                         # get the depth reading at the centroid location
                         depth_value = self.image_depth[int(depth_coords[0]), int(depth_coords[1])] # you might need to do some boundary checking first!
