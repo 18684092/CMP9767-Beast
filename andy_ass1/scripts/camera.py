@@ -238,9 +238,9 @@ class findBunches:
                     object_location.pose.orientation.w = 1
                     
                     # Produce an average location
-                    object_location.pose.position.x = xx / tt
-                    object_location.pose.position.y = yy / tt
-                    object_location.pose.position.z = zz / tt
+                    object_location.pose.position.x = round(xx / tt, 2)
+                    object_location.pose.position.y = round(yy / tt, 2)
+                    object_location.pose.position.z = round(zz / tt, 2)
 
                     # get the coordinates in the map frame
                     p_camera = self.tf_listener.transformPose('map', object_location)
