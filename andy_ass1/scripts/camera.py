@@ -52,7 +52,7 @@ class findBunches:
         # 84.1 and 70.0 taken from kinect2-gazebo.xacro file
         # NOTE TODO the 70.0 figure is disputed and should be 69.x or something
         # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9002889/#:~:text=The%20Kinect%20v2%20depth%20sensor,4.5%20m%20range%20%5B13%5D.
-        self.color2depth_aspect = (84.1/1920) / (69/512)
+        self.color2depth_aspect = (84.1/1920) / (60/512)
 
         # A list of x,y,z for each bunch detected
         self.bunches = []
