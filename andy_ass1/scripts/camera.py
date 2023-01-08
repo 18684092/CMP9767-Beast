@@ -174,7 +174,10 @@ class findBunches:
                         # The depth array is smaller than the original colour image
                         depth_coords = (self.image_depth.shape[0] / 2 + ((cY+v[0]) - self.orig_image.shape[0] / 2) * self.color2depth_aspect, 
                             self.image_depth.shape[1] / 2 + ((cX+v[1]) - self.orig_image.shape[1] / 2) * self.color2depth_aspect)
-                    
+
+                        if cY /2 > 511:
+                            continue
+
                         # get the depth reading at the centroid location
                         depth_value = self.image_depth[int(depth_coords[0]), int(depth_coords[1])] # you might need to do some boundary checking first!
 
@@ -219,7 +222,6 @@ class findBunches:
                         print("good", v[0], v[1], v[2])
                     print()
 
-
                     #define a point in camera coordinates
                     object_location = PoseStamped()
                     object_location.header.stamp = self.stampDepth
@@ -228,7 +230,6 @@ class findBunches:
                     object_location.pose.position.x = xx / tt
                     object_location.pose.position.y = yy / tt
                     object_location.pose.position.z = zz / tt
-
 
                     # get the coordinates in the map frame
                     p_camera = self.tf_listener.transformPose('map', object_location)

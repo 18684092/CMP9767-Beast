@@ -34,16 +34,17 @@ class Display:
         self.start = time.time()
         self.end = time.time()
 
-        # Setup all subscribers
-        # Subscriber topics
+        # Subscribers relating to robot and object positions
         rospy.Subscriber("/thorvald_001/object_distance", String, self.callbackDistance)
         rospy.Subscriber("/thorvald_001/robot_pose", Pose, self.callbackPose)
         
+        # Subscribers for what the robot is doing
         rospy.Subscriber("/thorvald_001/topological_navigation/goal", GotoNodeActionGoal, self.callbackGoal,queue_size=10)
         rospy.Subscriber("/thorvald_001/moving", String, self.callbackMoving)
         rospy.Subscriber("/thorvald_001/camera_done", String, self.callbackCamera)
         rospy.Subscriber("/thorvald_001/state", String, self.callbackState)
 
+        # Subscribers for data
         rospy.Subscriber('/thorvald_001/grape_bunches', PointCloud, self.grapes_callback)
         rospy.Subscriber('/thorvald_001/row_widths', String, self.callbackWidths)
 
@@ -74,8 +75,11 @@ class Display:
         # distance related
         self.distanceTravelled = 0
         self.initialPosition = (0.0, 0.0)
+        
+        # Object Distance dictionary
         self.od = {}
 
+        # States and data
         self.moving = "false"
         self.camera = "not imaging"
         self.state = 'Initialising'
@@ -84,19 +88,34 @@ class Display:
         self.numberGrapes = 0
         self.widths = {}
 
+    ####################
+    # Object detection #
+    ####################
     def callbackWidths(self, data):
         self.widths = json.loads(data.data)
         print(self.widths)
 
+    #########
+    # State #
+    #########
     def callbackState(self, data):
         self.state = data.data
 
+    ###########
+    # Bunches #
+    ###########
     def grapes_callback(self, pc):
         self.numberBunches = len(pc.points)
 
+    ##########
+    # Moving #
+    ##########
     def callbackMoving(self, data):
         self.moving = data.data
 
+    ###############
+    # Camera busy #
+    ###############
     def callbackCamera(self, data):
         self.camera = data.data
 
@@ -116,7 +135,9 @@ class Display:
     def drawScreen(self):
         cv2.imshow("AndyAss1",self.img)
         
-
+    ###########
+    # addText #
+    ###########
     def addText(self):
         self.img = np.zeros((512,512,3), np.uint8)
         distance =     "Distance travelled: " + str(round(self.distanceTravelled,2)) + " m"
@@ -149,10 +170,13 @@ class Display:
         try:
             widths1 = min(float(self.widths['row1']['min']) ,  float(self.widths['row2']['min']))
             widths2 = max(float(self.widths['row1']['max']) ,  float(self.widths['row2']['max']))
-           
-            gWidth1 = "Grapevine length: " + str(round(abs(widths1) + widths2 + 0.6 , 2)) + " m"
+            if widths1 < 0 and widths2 < 0:
+                w = abs(widths1) - abs(widths2)
+            elif  widths1 < 0 and widths2 >= 0:
+                w = abs(widths1) + abs(widths2)
+            gWidth1 = "Grapevine length: " + str(round(w , 2)) + " m"
  
-            bunchMetre = "Average bunches per metre: " + str(round(self.numberBunches / (widths1 + widths2), 1))
+            bunchMetre = "Average bunches per metre: " + str(round(self.numberBunches / (w)))
         except:
             gWidth1 = "Grapevine length: 0 m"
             avgWidth = 0
@@ -177,18 +201,17 @@ class Display:
         cv2.putText(self.img, timing, (10,315), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
 
 
-
-
     #############
     # kmToMiles # 
     #############
     def kmToMiles(self, metres):
         return (metres / 1000) * 0.621371
 
+    ####################
+    # Topological goal #
+    ####################
     def callbackGoal(self, data):
         self.target = data.goal.target
-
-
 
     ################
     # callbackPose #
@@ -237,10 +260,6 @@ class Display:
         ''' Listens for object distances '''
         self.od = json.loads(data.data)
         self.activeD = True
-
-
-
-
 
 ########
 # main #
