@@ -50,7 +50,9 @@ class findBunches:
 
         # 1920 is width of HD colour, 512 is SD depth width
         # 84.1 and 70.0 taken from kinect2-gazebo.xacro file
-        self.color2depth_aspect = (84.1/1920) / (70.0/512)
+        # NOTE TODO the 70.0 figure is disputed and should be 69.x or something
+        # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9002889/#:~:text=The%20Kinect%20v2%20depth%20sensor,4.5%20m%20range%20%5B13%5D.
+        self.color2depth_aspect = (84.1/1920) / (69/512)
 
         # A list of x,y,z for each bunch detected
         self.bunches = []
@@ -62,16 +64,20 @@ class findBunches:
         self.tf_listener = tf.TransformListener()
     
         sub_image = rospy.Subscriber("/thorvald_001/kinect2_" + self.camera + "_camera/hd/image_color_rect", Image, self.image_callback)
-        self.camera_info_sub = rospy.Subscriber('/thorvald_001/kinect2_' + camera + '_camera/hd/camera_info', CameraInfo, self.camera_info_callback)
-        rospy.Subscriber("/thorvald_001/kinect2_" + camera + "_sensor/sd/image_depth_rect", Image, self.image_depth_callback)
+        self.camera_info_sub = rospy.Subscriber('/thorvald_001/kinect2_' + self.camera + '_camera/hd/camera_info', CameraInfo, self.camera_info_callback)
+        rospy.Subscriber("/thorvald_001/kinect2_" + self.camera + "_sensor/sd/image_depth_rect", Image, self.image_depth_callback)
 
         rospy.Subscriber("/thorvald_001/moving", String, self.callback_moving)
         rospy.Subscriber("/thorvald_001/row", String, self.callback_row)
+
+        # Go_grapevine.py needs to know when camera image processing has finished 
         self.move = rospy.Publisher('/thorvald_001/camera_done', String, queue_size=1, latch=True)
+
+        # Row widths used within main_display.py 
         self.widths = rospy.Publisher('/thorvald_001/row_widths', String, queue_size=10, latch=True)
         
         # Publish a pointcloud - NOTE - intensities are own format and not compatible with RVIZ
-        # but these get changed and made compatible by collate_point.py ready for RVIZ.
+        # but these get changed and made compatible by point_colation.py ready for RVIZ.
         self.object_location_pub2 = rospy.Publisher('/thorvald_001/grapes_'+camera, PointCloud, queue_size=1)
 
     def callback_moving(self, data):
@@ -166,7 +172,7 @@ class findBunches:
                 cv2.circle(self.orig_image, (cX, cY), 7, (255, 255, 255), -1)
                 cv2.putText(self.orig_image, str(self.num_bunches), (cX - 20, cY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
                 
-                
+                # Rather than use a single pixel point a 7 x 7 area is sampled for depth and to reduce x,y positional noise
                 aX = []
                 aY = []
                 aZ = []
@@ -176,7 +182,6 @@ class findBunches:
                         # The depth array is smaller than the original colour image
                         depth_coords = (self.image_depth.shape[0] / 2 + ((cY+v[0]) - self.orig_image.shape[0] / 2) * self.color2depth_aspect, 
                             self.image_depth.shape[1] / 2 + ((cX+v[1]) - self.orig_image.shape[1] / 2) * self.color2depth_aspect)
-
 
                         # get the depth reading at the centroid location
                         depth_value = self.image_depth[int(depth_coords[0]), int(depth_coords[1])] # you might need to do some boundary checking first!
@@ -189,7 +194,9 @@ class findBunches:
                         aY.append(camera_coords[1])
                         aZ.append(camera_coords[2])
 
-                    print("deptg")
+                    ##################################################################################################
+                    # EXPERIMENTING!!!                                                                               #
+                    ##################################################################################################
                     # any depth that is more than 0.2m away from average - delete
                     i = 0
                     while i < len(aZ):
@@ -221,12 +228,15 @@ class findBunches:
                         zz += v[2]
                         print("good", v[0], v[1], v[2])
                     print()
+                    ##################################################################################################
+
 
                     #define a point in camera coordinates
                     object_location = PoseStamped()
-                    object_location.header.stamp = self.stampDepth
-                    object_location.header.frame_id = self.camera_model.tfFrame() #"thorvald_001/kinect2_" + self.camera + "_rgb_optical_frame"
+                    object_location.header.stamp = self.stampDepth # Makes no difference if included - TODO why?
+                    object_location.header.frame_id = self.camera_model.tfFrame() 
                     object_location.pose.orientation.w = 1
+                    # Produce an average location
                     object_location.pose.position.x = xx / tt
                     object_location.pose.position.y = yy / tt
                     object_location.pose.position.z = zz / tt
@@ -235,7 +245,8 @@ class findBunches:
                     p_camera = self.tf_listener.transformPose('map', object_location)
 
                     # Depth can get confused by blocks / objects close to camera
-                    xL = p_camera.pose.position.y < -6 and p_camera.pose.position.y > -8.5
+                    # NOTE TODO this should be changed as distance away from camera not a map position
+                    xL = p_camera.pose.position.y < -6.5 and p_camera.pose.position.y > -8.5
 
                     if "nan" not in str(p_camera.pose) and xL:
                         p = Point32()
@@ -243,6 +254,8 @@ class findBunches:
                         p.x = p_camera.pose.position.x
                         p.y = p_camera.pose.position.y
                         p.z = p_camera.pose.position.z
+
+                        # Keep track of the extremeties of bunches so as to not double count
                         mini = p.x < rMin
                         maxi = p.x > rMax 
                         if mini or maxi:
@@ -252,6 +265,8 @@ class findBunches:
                             if maxi:
                                 if p.x > thisMax:
                                     thisMax = p.x 
+
+                            # this bunch is outside of what has previously been seen so append it to the pointcloud
                             pc.points.append(p)
                             ch.name = "intensity"
                             ch.values = (area , area , area)
@@ -262,8 +277,12 @@ class findBunches:
                 except Exception as e:
                     print("exception", e, "bunch")
                     cv2.circle(self.orig_image, (cX, cY), 7, (0, 0, 255), -1)
+
         # Publish the point cloud
         self.object_location_pub2.publish(pc)
+
+        # The next image will only count bunches not seen before BUT allow some over lap
+        # Hopefully double counting is picked up within point_colation.py
         if thisMin < self.rowMinMax[self.row]['min']:
             self.rowMinMax[self.row]['min'] = thisMin + 0.3
         if thisMax > self.rowMinMax[self.row]['max']:

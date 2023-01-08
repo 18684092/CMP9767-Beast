@@ -174,6 +174,8 @@ class Display:
                 w = abs(widths1) - abs(widths2)
             elif  widths1 < 0 and widths2 >= 0:
                 w = abs(widths1) + abs(widths2)
+            elif widths1 > 0 and width2 > 0:
+                w = abs(widths1) + abs(widths2)
             gWidth1 = "Grapevine length: " + str(round(w , 2)) + " m"
  
             bunchMetre = "Average bunches per metre: " + str(round(self.numberBunches / (w)))
