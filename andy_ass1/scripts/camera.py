@@ -52,7 +52,7 @@ class findBunches:
         # 84.1 and 70.0 taken from kinect2-gazebo.xacro file
         # NOTE TODO the 70.0 figure is disputed and should be 69.x or something
         # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9002889/#:~:text=The%20Kinect%20v2%20depth%20sensor,4.5%20m%20range%20%5B13%5D.
-        self.color2depth_aspect = (84.1/1920) / (60/512)
+        self.color2depth_aspect = (84.1/1920) / (70.0/512)
 
         # A list of x,y,z for each bunch detected
         self.bunches = []
@@ -177,7 +177,7 @@ class findBunches:
                 aY = []
                 aZ = []
                 try:
-                    for i,v in enumerate([(-1,-1), (-1,0), (-1,1), (0, 0), (0, -1), (0, 1), (1,-1), (1,0), (1,1), (-2,-2), (-2,-1), (-2, 0), (-2,1), (-2,2), (-1,-2), (0,-2), (1,-2), (2,-2), (2,-1), (2,0), (2,1), (2,2), (1,2), (0,2),(-1,2), (-3,-3), (-3, -2), (-3,-1), (-3,0), (-3,1), (-3,2), (-3,3), (-2,-3), (-2,3), (-1,-3), (-1,3), (0,-3), (0,3),(1,-3), (1,3), (2,-3), (2,3), (3,-3),(3,-2),(3,-1),(3,0),(3,1),(3,2),(3,3)]):
+                    for i,v in enumerate([(-1,-1), (-1,0), (-1,1), (0, 0), (0, -1), (0, 1), (1,-1), (1,0), (1,1), (-2,-2), (-2,-1), (-2, 0), (-2,1), (-2,2), (-1,-2), (0,-2), (1,-2), (2,-2), (2,-1), (2,0), (2,1), (2,2), (1,2), (0,2),(-1,2)]):#, (-3,-3), (-3, -2), (-3,-1), (-3,0), (-3,1), (-3,2), (-3,3), (-2,-3), (-2,3), (-1,-3), (-1,3), (0,-3), (0,3),(1,-3), (1,3), (2,-3), (2,3), (3,-3),(3,-2),(3,-1),(3,0),(3,1),(3,2),(3,3)]):
 
                         # The depth array is smaller than the original colour image
                         depth_coords = (self.image_depth.shape[0] / 2 + ((cY+v[0]) - self.orig_image.shape[0] / 2) * self.color2depth_aspect, 
@@ -236,6 +236,7 @@ class findBunches:
                     object_location.header.stamp = self.stampDepth # Makes no difference if included - TODO why?
                     object_location.header.frame_id = self.camera_model.tfFrame() 
                     object_location.pose.orientation.w = 1
+                    
                     # Produce an average location
                     object_location.pose.position.x = xx / tt
                     object_location.pose.position.y = yy / tt
@@ -306,6 +307,7 @@ class findBunches:
         # Image is BGR
         self.cv_image = self.bridge.imgmsg_to_cv2(img_msg, "passthrough")
         self.image_depth = self.bridge.imgmsg_to_cv2(self.image_depth_ros, "32FC1")
+        
         # We want to display a nice colour correct image
         self.orig_image = cv2.cvtColor(self.cv_image, cv2.COLOR_BGR2RGB)
 
