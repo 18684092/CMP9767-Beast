@@ -9,21 +9,30 @@
                 <!-- Load a predifined RVIZ config-->
                 <arg name="rviz_config_file" default="/home/ubuntu/ros_ws/src/andy_ass1/worlds/andy4.rviz"/> 
                 <!-- Load a modified Gazebo world with objects -->
-                <arg name="world" default="/home/ubuntu/ros_ws/src/andy_ass1/worlds/vineyard_blocks.world"/>
+                <arg name="world" default="/home/ubuntu/ros_ws/src/andy_ass1/worlds/vineyard_blocks2.world"/>
 
+                <!-- fake_localisation:=false for amcl -->
+                <arg name="fake_localisation" default="false"/>
 
+                <!-- false removes Gazebo GUI - speeds up -->
                 <arg name="gui" default="false"/>
         </include>
 
-        
-                <include file="$(find uol_cmp9767m_tutorial)/launch/topo_nav.launch">
-                <!-- Filename of the topological map. --> 
+        <!-- Topological navigation - allows nodes to be added also --> 
+        <include file="$(find uol_cmp9767m_tutorial)/launch/topo_nav.launch">
+                 <!-- Filename of the topological map. --> 
                 <arg name="file" value="/home/ubuntu/ros_ws/src/andy_ass1/maps/andy_new3.tmap2"/>
         </include>
+
+        <include file="$(find bacchus_move_base)/launch/corner_lasers_merger.launch">
+                <arg name="tf_prefix" value="thorvald_001/"/>
+        </include>
+
+        <!-- uol_cmp9767m_tutorial amcl.launch -->
+        <include file="$(find andy_ass1)/launch/amcl.launch" >
+
+        </include>
         
-
-
-
         <!-- Publish aggregated object distance information around robot -->
         <node pkg="andy_ass1" name="object_distance" type="object_distance.py" />
 
@@ -43,11 +52,12 @@
         passing parameters to select which camera to use -->
         <node pkg="andy_ass1" name="cameraLeft" type="camera.py">
                 <param name="camera" value="left" type="string" /> 
-        </node>
+        </node> -->
+        <!--
         <node pkg="andy_ass1" name="cameraRight" type="camera.py">  
                 <param name="camera" value="right" type="string" />
-        </node>
-        <!--
+        </node> 
+        
         <node pkg="andy_ass1" name="cameraFront" type="camera.py">
                 <param name="camera" value="front" type="string" />
         </node>
@@ -57,9 +67,11 @@
         <node pkg="andy_ass1" name="point_colation" type="point_colation.py"  /> 
 
         <!-- Navigate to grapevine -->
-        <node pkg="andy_ass1" name="grapevine" type="go_grapevine.py"  /> 
+        <node pkg="andy_ass1" name="go_grapevine" type="go_grapevine.py"  /> 
 
         <!-- Programatically add nodes -->
         <node pkg="andy_ass1" name="add_nodes" type="add_nodes.py"  /> 
+
+
   
 </launch>

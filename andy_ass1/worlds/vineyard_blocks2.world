@@ -2,7 +2,7 @@
   <world name='default'>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>0.249423 -5.06072 42.2537 0 1.57 0</pose>
+        <pose>0.341216 -5.97973 42.2538 0 1.57 0</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
@@ -606,6 +606,165 @@
       <elevation>0</elevation>
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
+    <model name='unit_box'>
+      <pose>11.226 -0.629498 0.5 0 -0 0</pose>
+      <link name='link'>
+        <inertial>
+          <mass>1</mass>
+          <inertia>
+            <ixx>0.166667</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.166667</iyy>
+            <iyz>0</iyz>
+            <izz>0.166667</izz>
+          </inertia>
+          <pose>0 0 0 0 -0 0</pose>
+        </inertial>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <name>Gazebo/Grey</name>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+            </script>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+    <model name='unit_box_0'>
+      <pose>7.18363 -0.540158 0.5 0 -0 0</pose>
+      <link name='link'>
+        <inertial>
+          <mass>1</mass>
+          <inertia>
+            <ixx>0.166667</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.166667</iyy>
+            <iyz>0</iyz>
+            <izz>0.166667</izz>
+          </inertia>
+          <pose>0 0 0 0 -0 0</pose>
+        </inertial>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <name>Gazebo/Grey</name>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+            </script>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+    <model name='unit_box_1'>
+      <pose>2.75262 -0.570699 0.5 0 -0 0</pose>
+      <link name='link'>
+        <inertial>
+          <mass>1</mass>
+          <inertia>
+            <ixx>0.166667</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.166667</iyy>
+            <iyz>0</iyz>
+            <izz>0.166667</izz>
+          </inertia>
+          <pose>0 0 0 0 -0 0</pose>
+        </inertial>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <name>Gazebo/Grey</name>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+            </script>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
     <model name='unit_box_2'>
       <pose>-1.70737 -0.510999 0.5 0 -0 0</pose>
       <link name='link'>
@@ -1031,10 +1190,10 @@
       </link>
     </model>
     <state world_name='default'>
-      <sim_time>828 555000000</sim_time>
-      <real_time>30 916692099</real_time>
-      <wall_time>1672745582 259770204</wall_time>
-      <iterations>5868</iterations>
+      <sim_time>885 580000000</sim_time>
+      <real_time>29 404409951</real_time>
+      <wall_time>1672860649 837808056</wall_time>
+      <iterations>5849</iterations>
       <model name='cmp9767m_enclosure'>
         <pose>0 0 0 0 -0 0</pose>
         <scale>1 1 1</scale>
@@ -1074,71 +1233,101 @@
         </link>
       </model>
       <model name='thorvald_001'>
-        <pose>-11.2411 1.30373 -0 -0 1e-06 -0.054424</pose>
+        <pose>-7.67779 6.51177 -2e-06 0 -1e-06 -0.054207</pose>
         <scale>1 1 1</scale>
         <link name='thorvald_001/base_link'>
-          <pose>-11.2411 1.30373 -0 -0 1e-06 -0.054424</pose>
-          <velocity>4.5e-05 -4e-06 -4e-06 0 -0 3e-06</velocity>
-          <acceleration>0 0 2e-06 0 -0 0</acceleration>
-          <wrench>2.2e-05 1e-06 0.000132 0 -0 0</wrench>
+          <pose>-7.67779 6.51177 -2e-06 0 -1e-06 -0.054207</pose>
+          <velocity>5.7e-05 -5e-06 -3e-06 -0 1e-06 3e-06</velocity>
+          <acceleration>-1e-06 0 1e-06 0 -0 0</acceleration>
+          <wrench>-7.1e-05 5e-06 0.00011 0 -0 0</wrench>
         </link>
         <link name='thorvald_001/leg0'>
-          <pose>-11.8137 0.88526 0.200002 3e-06 5e-06 -0.056357</pose>
-          <velocity>4.7e-05 -6e-06 -3e-06 -2.1e-05 1e-06 -0.000195</velocity>
-          <acceleration>0 0 2e-06 4e-06 3e-06 -7e-06</acceleration>
-          <wrench>4e-06 2e-06 2.4e-05 0 -0 0</wrench>
+          <pose>-8.25031 6.09317 0.199999 -1.2e-05 5e-06 -0.055281</pose>
+          <velocity>5.9e-05 -7e-06 -2e-06 -1.4e-05 2e-06 -0.000256</velocity>
+          <acceleration>-1e-06 0 1e-06 -1e-06 -1.6e-05 -1.4e-05</acceleration>
+          <wrench>-1e-05 2e-06 1.6e-05 0 -0 0</wrench>
         </link>
         <link name='thorvald_001/leg1'>
-          <pose>-10.7174 0.825532 0.200001 -2e-06 5e-06 -0.05657</pose>
-          <velocity>4.7e-05 -3e-06 -4e-06 -2.1e-05 1e-06 -0.000187</velocity>
-          <acceleration>0 0 2e-06 5e-06 -2e-06 -1.2e-05</acceleration>
-          <wrench>4e-06 1e-06 2.4e-05 0 -0 0</wrench>
+          <pose>-7.15393 6.03368 0.2 -4e-06 4e-06 -0.061214</pose>
+          <velocity>5.9e-05 -3e-06 -4e-06 -2.1e-05 2e-06 -0.000242</velocity>
+          <acceleration>-1e-06 0 2e-06 4e-06 -5e-06 -1.1e-05</acceleration>
+          <wrench>-1e-05 2e-06 2.4e-05 0 -0 0</wrench>
         </link>
         <link name='thorvald_001/leg2'>
-          <pose>-10.6685 1.7222 0.2 7e-06 5e-06 -0.052078</pose>
-          <velocity>4.4e-05 -2e-06 -4e-06 2.1e-05 -1e-06 0.000216</velocity>
-          <acceleration>0 -0 2e-06 -4e-06 -7e-06 -2e-06</acceleration>
-          <wrench>4e-06 -2e-06 2.4e-05 0 -0 0</wrench>
+          <pose>-7.10527 6.93036 0.2 9e-06 4e-06 -0.04593</pose>
+          <velocity>5.6e-05 -3e-06 -3e-06 2.1e-05 -0 0.000266</velocity>
+          <acceleration>-1e-06 -0 2e-06 -4e-06 -1.2e-05 -1e-06</acceleration>
+          <wrench>-1e-05 -2e-06 2.4e-05 0 -0 0</wrench>
         </link>
         <link name='thorvald_001/leg3'>
-          <pose>-11.7649 1.78193 0.199999 -3e-06 -0 -0.053622</pose>
-          <velocity>4.4e-05 -6e-06 -4e-06 -6e-06 -0 -2.8e-05</velocity>
-          <acceleration>0 0 2e-06 3e-06 -1e-06 -5e-06</acceleration>
-          <wrench>4e-06 0 2.4e-05 0 -0 0</wrench>
+          <pose>-8.20166 6.98985 0.199997 -7e-06 -2e-06 -0.05612</pose>
+          <velocity>5.6e-05 -6e-06 -2e-06 -4e-06 1e-06 -4e-05</velocity>
+          <acceleration>-1e-06 0 1e-06 2e-06 -2e-06 -1.2e-05</acceleration>
+          <wrench>-1e-05 1e-06 1.6e-05 0 -0 0</wrench>
         </link>
         <link name='thorvald_001/wheel0_link'>
-          <pose>-11.8137 0.885267 0.200005 -1.57072 0.031957 -0.056356</pose>
-          <velocity>4.7e-05 -8e-06 -4e-06 -4.3e-05 0.000151 -0.000195</velocity>
-          <acceleration>0 1e-06 2e-06 -0.002716 -0.048548 -1.2e-05</acceleration>
-          <wrench>2e-06 7e-06 9e-06 0 -0 0</wrench>
+          <pose>-8.25031 6.09318 0.200002 -1.57075 0.03829 -0.055282</pose>
+          <velocity>5.9e-05 -8e-06 -2e-06 -2.5e-05 0.000186 -0.000256</velocity>
+          <acceleration>-1e-06 1e-06 1e-06 -0.003304 -0.059985 -3e-06</acceleration>
+          <wrench>-4e-06 5e-06 6e-06 0 -0 0</wrench>
         </link>
         <link name='thorvald_001/wheel1_link'>
-          <pose>-10.7174 0.825537 0.200004 -1.57074 0.005188 -0.056571</pose>
-          <velocity>4.7e-05 -5e-06 -4e-06 -4.4e-05 0.000155 -0.000186</velocity>
-          <acceleration>0 1e-06 2e-06 -0.002804 -0.049911 -1.6e-05</acceleration>
-          <wrench>2e-06 6e-06 9e-06 0 -0 0</wrench>
+          <pose>-7.15393 6.03369 0.200003 -1.57074 0.019482 -0.061215</pose>
+          <velocity>5.9e-05 -6e-06 -4e-06 -4e-05 0.000193 -0.000242</velocity>
+          <acceleration>-1e-06 1e-06 2e-06 -0.003764 -0.061772 -1e-05</acceleration>
+          <wrench>-4e-06 6e-06 9e-06 0 -0 0</wrench>
         </link>
         <link name='thorvald_001/wheel2_link'>
-          <pose>-10.6685 1.7222 0.200004 -1.57086 0.147848 -0.052085</pose>
-          <velocity>4.4e-05 0 -4e-06 5.9e-05 0.00013 0.000216</velocity>
-          <acceleration>0 -1e-06 2e-06 -0.002289 -0.043487 -1.2e-05</acceleration>
-          <wrench>1e-06 -7e-06 9e-06 0 -0 0</wrench>
+          <pose>-7.10527 6.93036 0.200003 -1.57085 0.159097 -0.045937</pose>
+          <velocity>5.6e-05 -1e-06 -3e-06 6e-05 0.000169 0.000266</velocity>
+          <acceleration>-1e-06 -1e-06 2e-06 -0.002586 -0.055768 -1.6e-05</acceleration>
+          <wrench>-4e-06 -6e-06 9e-06 0 -0 0</wrench>
         </link>
         <link name='thorvald_001/wheel3_link'>
-          <pose>-11.7649 1.78193 0.200003 -1.57084 -0.067685 -0.053614</pose>
-          <velocity>4.4e-05 -3e-06 -3e-06 6.4e-05 0.000228 -2.8e-05</velocity>
-          <acceleration>0 -1e-06 2e-06 -0.004087 -0.075742 -6e-06</acceleration>
-          <wrench>1e-06 -6e-06 9e-06 0 -0 0</wrench>
+          <pose>-8.20166 6.98985 0.2 -1.5708 -0.055544 -0.056113</pose>
+          <velocity>5.6e-05 -5e-06 -2e-06 5.1e-05 0.000293 -4e-05</velocity>
+          <acceleration>-1e-06 -1e-06 1e-06 -0.005421 -0.096241 -2e-06</acceleration>
+          <wrench>-4e-06 -4e-06 6e-06 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='unit_box'>
+        <pose>11.226 -0.629498 0.5 0 0 -1e-06</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>11.226 -0.629498 0.5 0 0 -1e-06</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 9.8 -1e-06 1e-06 0</acceleration>
+          <wrench>0 0 9.8 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='unit_box_0'>
+        <pose>7.18362 -0.540147 0.5 0 0 -1e-06</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>7.18362 -0.540147 0.5 0 0 -1e-06</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 9.8 -1e-06 1e-06 0</acceleration>
+          <wrench>0 0 9.8 0 -0 0</wrench>
+        </link>
+      </model>
+      <model name='unit_box_1'>
+        <pose>2.75262 -0.570699 0.5 0 -0 0</pose>
+        <scale>1 1 1</scale>
+        <link name='link'>
+          <pose>2.75262 -0.570699 0.5 0 -0 0</pose>
+          <velocity>0 0 0 0 -0 0</velocity>
+          <acceleration>0 0 9.8 -1e-06 1e-06 0</acceleration>
+          <wrench>0 0 9.8 0 -0 0</wrench>
         </link>
       </model>
       <model name='unit_box_2'>
-        <pose>-1.70737 -0.510901 0.499902 -0.000196 0 0</pose>
+        <pose>-1.70737 -0.510999 0.5 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>-1.70737 -0.510901 0.499902 -0.000196 0 0</pose>
+          <pose>-1.70737 -0.510999 0.5 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>-8.4e-05 2.9257 -4.92378 0.431627 -0.000706 -0.000355</acceleration>
-          <wrench>-8.4e-05 2.9257 -4.92378 0 -0 0</wrench>
+          <acceleration>0 0 9.8 -1e-06 1e-06 0</acceleration>
+          <wrench>0 0 9.8 0 -0 0</wrench>
         </link>
       </model>
       <model name='unit_box_3'>
@@ -1147,28 +1336,28 @@
         <link name='link'>
           <pose>-5.05951 -0.900426 0.5 0 -0 1e-06</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0 -0 9.8 1e-06 1e-06 0</acceleration>
-          <wrench>0 -0 9.8 0 -0 0</wrench>
+          <acceleration>0 0 9.8 -1e-06 1e-06 0</acceleration>
+          <wrench>0 0 9.8 0 -0 0</wrench>
         </link>
       </model>
       <model name='unit_box_4'>
-        <pose>-9.57788 -1.0803 0.499902 -0.000196 0 0</pose>
+        <pose>-9.57788 -1.0804 0.5 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>-9.57788 -1.0803 0.499902 -0.000196 0 0</pose>
+          <pose>-9.57788 -1.0804 0.5 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>-8.4e-05 2.9257 -4.92378 0.431627 -0.000706 -0.000355</acceleration>
-          <wrench>-8.4e-05 2.9257 -4.92378 0 -0 0</wrench>
+          <acceleration>0 0 9.8 -1e-06 1e-06 0</acceleration>
+          <wrench>0 0 9.8 0 -0 0</wrench>
         </link>
       </model>
       <model name='unit_box_5'>
-        <pose>-11.8264 -1.22042 0.499902 -0.000196 0 -0.013871</pose>
+        <pose>-11.8264 -1.22052 0.5 0 0 -0.013871</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>-11.8264 -1.22042 0.499902 -0.000196 0 -0.013871</pose>
+          <pose>-11.8264 -1.22052 0.5 0 0 -0.013871</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>0.040395 2.92543 -4.92375 0.432165 0.081453 0.000442</acceleration>
-          <wrench>0.040395 2.92543 -4.92375 0 -0 0</wrench>
+          <acceleration>0 0 9.8 -1e-06 1e-06 0</acceleration>
+          <wrench>0 0 9.8 0 -0 0</wrench>
         </link>
       </model>
       <model name='unit_box_6'>
@@ -1182,33 +1371,33 @@
         </link>
       </model>
       <model name='unit_box_7'>
-        <pose>-11.6728 -11.6147 0.499902 -0.000196 0 0</pose>
+        <pose>-11.6728 -11.6148 0.5 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>-11.6728 -11.6147 0.499902 -0.000196 0 0</pose>
+          <pose>-11.6728 -11.6148 0.5 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>-8.4e-05 2.9257 -4.92378 0.431627 -0.000706 -0.000355</acceleration>
-          <wrench>-8.4e-05 2.9257 -4.92378 0 -0 0</wrench>
+          <acceleration>0 0 9.8 -1e-06 1e-06 0</acceleration>
+          <wrench>0 0 9.8 0 -0 0</wrench>
         </link>
       </model>
       <model name='unit_box_8'>
-        <pose>2.90231 11.4928 0.499902 -0.000196 0 0</pose>
+        <pose>2.90231 11.4927 0.5 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>2.90231 11.4928 0.499902 -0.000196 0 0</pose>
+          <pose>2.90231 11.4927 0.5 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>-8.4e-05 2.9257 -4.92378 0.431627 -0.000706 -0.000355</acceleration>
-          <wrench>-8.4e-05 2.9257 -4.92378 0 -0 0</wrench>
+          <acceleration>0 0 9.8 -1e-06 1e-06 0</acceleration>
+          <wrench>0 0 9.8 0 -0 0</wrench>
         </link>
       </model>
       <model name='unit_box_9'>
-        <pose>-2.69518 6.58259 0.499866 0.000134 -0.000134 1e-06</pose>
+        <pose>-2.69511 6.58266 0.5 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link'>
-          <pose>-2.69518 6.58259 0.499866 0.000134 -0.000134 1e-06</pose>
+          <pose>-2.69511 6.58266 0.5 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
-          <acceleration>-2.67066 -2.67065 -5.34863 -0.941001 0.941078 6.1e-05</acceleration>
-          <wrench>-2.67066 -2.67065 -5.34863 0 -0 0</wrench>
+          <acceleration>0 0 9.8 -1e-06 1e-06 0</acceleration>
+          <wrench>0 0 9.8 0 -0 0</wrench>
         </link>
       </model>
       <model name='vine_t4_0'>

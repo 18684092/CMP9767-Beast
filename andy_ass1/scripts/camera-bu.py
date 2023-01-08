@@ -11,7 +11,6 @@ from geometry_msgs.msg import PoseStamped, PoseArray, Pose, Point, Point32
 import numpy as np
 from std_msgs.msg import String
 import json
-import math
 
 # Import OpenCV libraries and tools
 import cv2
@@ -34,7 +33,6 @@ class findBunches:
         self.camera = camera
         self.num_bunches = 0
         self.num_labels = 0
-        self.iNum = 0
 
         self.moving = "true"
         self.row = ''
@@ -44,9 +42,6 @@ class findBunches:
         self.orig_image = None
         self.labeled_image = None
         self.image_depth = None
-
-        self.stampDepth = None
-
 
         # 1920 is width of HD colour, 512 is SD depth width
         # 84.1 and 70.0 taken from kinect2-gazebo.xacro file
@@ -94,7 +89,6 @@ class findBunches:
     def image_depth_callback(self, data):
         ''' Receives kinect2 depth data '''
         self.image_depth_ros = data
-        self.stampDepth = data.header.stamp
 
     ##############
     # show_image #
@@ -148,7 +142,7 @@ class findBunches:
         pc.header.frame_id = "map"
         cnts = cv2.findContours(self.erosion, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         cnts = cnts[0] if len(cnts) == 2 else cnts[1]
-        min_area = 50
+        min_area = 350
         self.num_bunches = 0
         for c in cnts:
             M = cv2.moments(c)
@@ -156,118 +150,74 @@ class findBunches:
             cY = int(M["m01"] / M["m00"])
             area = cv2.contourArea(c)
             if area > min_area:
-                self.num_bunches += 1
-                self.bunches.append(c)
+                
                 cv2.drawContours(self.orig_image, [c], -1, (0,0,255), 2)
                 x,y,w,h = cv2.boundingRect(c)
-                cv2.rectangle(self.orig_image,(x-2,y-2),(x+w+2,y+h+2),(0,255,0),2)
+                #cv2.rectangle(self.orig_image,(x,y),(x+w,y+h),(0,255,0),2)
                 cv2.circle(self.orig_image, (cX, cY), 7, (255, 255, 255), -1)
                 cv2.putText(self.orig_image, str(self.num_bunches), (cX - 20, cY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
                 
-                
-                aX = []
-                aY = []
-                aZ = []
+                # The depth array is smaller than the original colour image
                 try:
-                    for i,v in enumerate([(-1,-1), (-1,0), (-1,1), (0, 0), (0, -1), (0, 1), (1,-1), (1,0), (1,1), (-2,-2), (-2,-1), (-2, 0), (-2,1), (-2,2), (-1,-2), (0,-2), (1,-2), (2,-2), (2,-1), (2,0), (2,1), (2,2), (1,2), (0,2),(-1,2), (-3,-3), (-3, -2), (-3,-1), (-3,0), (-3,1), (-3,2), (-3,3), (-2,-3), (-2,3), (-1,-3), (-1,3), (0,-3), (0,3),(1,-3), (1,3), (2,-3), (2,3), (3,-3),(3,-2),(3,-1),(3,0),(3,1),(3,2),(3,3)]):
+                    depth_coords = (self.image_depth.shape[0] / 2 + (cY - self.orig_image.shape[0] / 2) * self.color2depth_aspect, 
+                        self.image_depth.shape[1] / 2 + (cX - self.orig_image.shape[1] / 2) * self.color2depth_aspect)
+                
+                    # get the depth reading at the centroid location
+                    depth_value = self.image_depth[int(depth_coords[0]), int(depth_coords[1])] # you might need to do some boundary checking first!
 
-                        # The depth array is smaller than the original colour image
-                        depth_coords = (self.image_depth.shape[0] / 2 + ((cY+v[0]) - self.orig_image.shape[0] / 2) * self.color2depth_aspect, 
-                            self.image_depth.shape[1] / 2 + ((cX+v[1]) - self.orig_image.shape[1] / 2) * self.color2depth_aspect)
-
-                        if cY /2 > 511:
-                            continue
-
-                        # get the depth reading at the centroid location
-                        depth_value = self.image_depth[int(depth_coords[0]), int(depth_coords[1])] # you might need to do some boundary checking first!
-
-                        # calculate object's 3d location in camera coords
-                        camera_coords = self.camera_model.projectPixelTo3dRay((cX, cY)) #project the image coords (x,y) into 3D ray in camera coords 
-                        camera_coords = [x/camera_coords[2] for x in camera_coords] # adjust the resulting vector so that z = 1
-                        camera_coords = [x*depth_value for x in camera_coords] # multiply the vector by depth
-                        aX.append(camera_coords[0])
-                        aY.append(camera_coords[1])
-                        aZ.append(camera_coords[2])
-
-                    print("deptg")
-                    # any depth that is more than 0.2m away from average - delete
-                    i = 0
-                    while i < len(aZ):
-                        if math.isnan(float(aZ[i])):
-                            print("Odd Z", aX[i], aY[i], aZ[i])
-                            del aZ[i]
-                            del aX[i]
-                            del aY[i]
-                            print(len(aZ))
-                        i += 1
-
-                    avg = sum(aZ) / len(aZ)
-
-                    xx = 0
-                    yy = 0
-                    zz = 0
-                    tt = 0
-                    print("Bunch", self.num_bunches)
-                    for v in zip(aX, aY, aZ):
-                        if math.isnan(float(v[0])) or math.isnan(float(v[1])) or math.isnan(float(v[2])):
-                            print("bad", v[0], v[1], v[2])
-                            continue
-                        if abs(v[2]) > abs(avg) + 0.20:
-                            print("bad extreme", v[0], v[1], v[2])
-                            continue
-                        tt += 1
-                        xx += v[0]
-                        yy += v[1]
-                        zz += v[2]
-                        print("good", v[0], v[1], v[2])
-                    print()
+                    # calculate object's 3d location in camera coords
+                    camera_coords = self.camera_model.projectPixelTo3dRay((cX, cY)) #project the image coords (x,y) into 3D ray in camera coords 
+                    camera_coords = [x/camera_coords[2] for x in camera_coords] # adjust the resulting vector so that z = 1
+                    camera_coords = [x*depth_value for x in camera_coords] # multiply the vector by depth
 
                     #define a point in camera coordinates
                     object_location = PoseStamped()
-                    object_location.header.stamp = self.stampDepth
                     object_location.header.frame_id = self.camera_model.tfFrame() #"thorvald_001/kinect2_" + self.camera + "_rgb_optical_frame"
                     object_location.pose.orientation.w = 1
-                    object_location.pose.position.x = xx / tt
-                    object_location.pose.position.y = yy / tt
-                    object_location.pose.position.z = zz / tt
+                    object_location.pose.position.x = camera_coords[0]
+                    object_location.pose.position.y = camera_coords[1]
+                    object_location.pose.position.z = camera_coords[2] 
+                    # Try/except when debugging making a point cloud - shouldnt be needed
+                    try:
+                        # get the coordinates in the map frame
+                        p_camera = self.tf_listener.transformPose('map', object_location)
 
-                    # get the coordinates in the map frame
-                    p_camera = self.tf_listener.transformPose('map', object_location)
-
-                    # Depth can get confused by blocks / objects close to camera
-                    xL = p_camera.pose.position.y < -6 and p_camera.pose.position.y > -8.5
-
-                    if "nan" not in str(p_camera.pose) and xL:
-                        p = Point32()
-                        ch = ChannelFloat32()
-                        p.x = p_camera.pose.position.x
-                        p.y = p_camera.pose.position.y
-                        p.z = p_camera.pose.position.z
-                        mini = p.x < rMin
-                        maxi = p.x > rMax 
-                        if mini or maxi:
-                            if mini:
-                                if p.x < thisMin:
-                                    thisMin = p.x 
-                            if maxi:
-                                if p.x > thisMax:
-                                    thisMax = p.x 
-                            pc.points.append(p)
-                            ch.name = "intensity"
-                            ch.values = (area , area , area)
-                            pc.channels.append(ch)
-
-
+                        # Depth can get confused by blocks / objects close to camera
+                        xL = p_camera.pose.position.y < -6 and p_camera.pose.position.y > -9
+                        #print(p_camera.pose.position.y)
+                        if "nan" not in str(p_camera.pose) and xL:
+                            p = Point32()
+                            ch = ChannelFloat32()
+                            p.x = p_camera.pose.position.x
+                            p.y = p_camera.pose.position.y
+                            p.z = p_camera.pose.position.z
+                            mini = p.x < rMin
+                            maxi = p.x > rMax 
+                            if mini or maxi:
+                                if mini:
+                                    if p.x < thisMin:
+                                        thisMin = p.x
+                                if maxi:
+                                    if p.x > thisMax:
+                                        thisMax = p.x
+                                pc.points.append(p)
+                                ch.name = "intensity"
+                                ch.values = (area * depth_value, area * depth_value, area * depth_value)
+                                pc.channels.append(ch)
+                                self.num_bunches += 1
+                                self.bunches.append(c)
+                    # Shouldn't get here NOTE and we don't appear to, ever        
+                    except Exception as e:
+                        print("ar crap", e)
                 # If point is out of bounds (no depth info) display it as red dot        
-                except Exception as e:
-                    print("exception", e, "bunch")
+                except:
                     cv2.circle(self.orig_image, (cX, cY), 7, (0, 0, 255), -1)
         # Publish the point cloud
         self.object_location_pub2.publish(pc)
         if thisMin < self.rowMinMax[self.row]['min']:
-            self.rowMinMax[self.row]['min'] = thisMin + 0.3
+            self.rowMinMax[self.row]['min'] = thisMin
         if thisMax > self.rowMinMax[self.row]['max']:
-            self.rowMinMax[self.row]['max'] = thisMax - 0.3  
+            self.rowMinMax[self.row]['max'] = thisMax    
         self.widths.publish(String(json.dumps(self.rowMinMax)))            
 
     ##################
@@ -327,8 +277,6 @@ class findBunches:
         
         self.move.publish(String('not imaging'))
         self.showImages()
-        self.iNum += 1
-
 
 
     ##############
@@ -338,7 +286,6 @@ class findBunches:
         
         if self.num_bunches > 0:
             self.show_image(self.orig_image, self.camera)
-            cv2.imwrite("/home/ubuntu/ros_ws/src/andy_ass1/images/"+self.row+"_"+str(self.iNum)+"_"+self.camera+".jpg", self.orig_image)
             #self.show_image(self.erosion, "Eroded")
         if self.num_labels > 20:
             self.show_image(self.labeled_image, self.camera + " Grapes")
@@ -348,7 +295,7 @@ class findBunches:
 # main #
 ########
 def main():
-    rospy.init_node('camera_processing', anonymous=True)
+    rospy.init_node('bunches', anonymous=True)
     try:
         camera = rospy.get_param('~camera')
     except:
