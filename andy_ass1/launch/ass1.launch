@@ -46,13 +46,21 @@
         </node> -->
 
         <!-- Information display -->
-        <node pkg="andy_ass1" name="main_display" type="main_display.py"  />
-
+        <node pkg="andy_ass1" name="main_display" type="main_display.py" >
+                <!-- How many rows of grapevines in field - 5 is a default-->
+                <param name="rows" value="5" type="string" />
+                <!-- How much a grape weighs 2g default-->
+                <param name="weight" value="2.0" type="string" />
+                <!-- number of grapes per bunch - depends on type of grape -->
+                <param name="grapes" value="50" type="string" />
+        </node>
         <!-- 3 Camera nodes to detect grapes from each camera using one script called multiple times
         passing parameters to select which camera to use -->
         <node pkg="andy_ass1" name="cameraLeft" type="camera.py">
                 <param name="camera" value="left" type="string" /> 
-        </node> -->
+                <!-- contour area for a valid bunch 100 is default (50 to 450) -->
+                <param name="area" value="100" type="string" />
+        </node>
         <!--
         <node pkg="andy_ass1" name="cameraRight" type="camera.py">  
                 <param name="camera" value="right" type="string" />
@@ -67,7 +75,10 @@
         <node pkg="andy_ass1" name="point_colation" type="point_colation.py"  /> 
 
         <!-- Navigate to grapevine -->
-        <node pkg="andy_ass1" name="go_grapevine" type="go_grapevine.py"  /> 
+        <node pkg="andy_ass1" name="go_grapevine" type="go_grapevine.py" >
+                <!-- groups bunches of grapes (presume same bunch) if they are within x metres of each other - default 0.2--> 
+                <param name="tolerance" value="0.2" type="string" />
+        </node> 
 
         <!-- Programatically add nodes -->
         <node pkg="andy_ass1" name="add_nodes" type="add_nodes.py"  /> 

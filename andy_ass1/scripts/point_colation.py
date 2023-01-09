@@ -22,13 +22,15 @@ class Collate:
     ########
     # init #
     ########
-    def __init__(self):
+    def __init__(self, tolerance = 0.2):
+
+        self.tol = tolerance
 
         # Store for all points from all cameras
         self.bunches = []
         # This will be published for RVIZ
         self.pcBunches = PointCloud()
-
+        
         # The cameras
         left = rospy.Subscriber('/thorvald_001/grapes_left', PointCloud, self.left_callback)
         right = rospy.Subscriber('/thorvald_001/grapes_right', PointCloud, self.right_callback)
@@ -67,7 +69,7 @@ class Collate:
         intensities = []
         for i, pointDict in enumerate(self.bunches):
             if i > 400: break
-            # Each point must have been seen x times to show its a reliable point - (needs to be a particle filter)
+            # Each point must have been seen x times to show its a reliable point - 
             if pointDict['n'] > 0:
                 p = Point32()
                 intensities.append(pointDict['i'])
@@ -93,7 +95,7 @@ class Collate:
             z = point.z 
             inten = channel.values[0]
             found = False
-            if z > 0.1:
+            if z > 0.05:
                 for i, pointDict in enumerate(self.bunches):
                     sX = pointDict['x']
                     sY = pointDict['y']
@@ -104,7 +106,7 @@ class Collate:
                     dY = abs(abs(sY) - abs(y))
                     dZ = abs(abs(sZ) - abs(z))
                     # Crude filter to group noisy point clouds - not effective really
-                    if dX < 0.2 and dY < 0.2 and dZ < 0.2:
+                    if dX < self.tol and dY < self.tol and dZ < self.tol:
                         # Multiple points that match suggest a better reading
                         self.bunches[i]['n'] += 1
                         # If this point is close enough to where another point is
@@ -126,7 +128,11 @@ class Collate:
 ########
 def main():
     rospy.init_node('bunches', anonymous=True)
-    collate = Collate()
+    try:
+        tolerance = float(rospy.get_param('~tolerance'))
+    except:
+        tolerance = 0.2 
+    collate = Collate(tolerance)
     rate = rospy.Rate(10)
     while not rospy.is_shutdown():  
         collate.publish()   

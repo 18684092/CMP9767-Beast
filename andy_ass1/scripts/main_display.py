@@ -13,6 +13,7 @@ from std_msgs.msg import String
 from geometry_msgs.msg import Pose
 from topological_navigation_msgs.msg import GotoNodeActionGoal
 from sensor_msgs.msg import PointCloud
+from sensor_msgs.msg import ChannelFloat32
 from math import sqrt
 import json
 import time
@@ -29,7 +30,10 @@ class Display:
     ########
     # init #
     ########
-    def __init__(self):
+    def __init__(self, rows, noGrapes, weight):
+        self.rows = rows
+        self.noGrapes = noGrapes
+        self.weight = weight
 
         self.start = time.time()
         self.end = time.time()
@@ -49,7 +53,7 @@ class Display:
         rospy.Subscriber('/thorvald_001/row_widths', String, self.callbackWidths)
 
         # Blank screen image
-        self.img = np.zeros((512,512,3), np.uint8)
+        self.img = np.zeros((600,512,3), np.uint8)
         
         # Font stuff
         self.font                   = cv2.FONT_HERSHEY_SIMPLEX
@@ -87,6 +91,9 @@ class Display:
         self.numberBunches = 0
         self.numberGrapes = 0
         self.widths = {}
+        self.small = 0
+        self.medium = 0
+        self.big = 0
 
     ####################
     # Object detection #
@@ -106,6 +113,19 @@ class Display:
     ###########
     def grapes_callback(self, pc):
         self.numberBunches = len(pc.points)
+        self.small = 0
+        self.big = 0
+        self.medium = 0
+        try:
+            for v in pc.channels[0].values:
+                if v > 4500:
+                    self.big += 1
+                elif v > 2000:
+                    self.medium += 1
+                else:
+                    self.small += 1
+        except Exception as e:
+            pass
 
     ##########
     # Moving #
@@ -139,7 +159,7 @@ class Display:
     # addText #
     ###########
     def addText(self):
-        self.img = np.zeros((512,512,3), np.uint8)
+        self.img = np.zeros((600,512,3), np.uint8)
         distance =     "Distance travelled: " + str(round(self.distanceTravelled,2)) + " m"
         distanceCrow = "Distance from start: " + str(round(self.getDistanceCrow(),2)) + " m"
         try:
@@ -157,7 +177,20 @@ class Display:
         target = "Topological goal: " + str(self.target)
         moving = "Robot moving: " + str(self.moving)
         camera = "Camera state: " + str(self.camera)
-        bunches = "Bunches of grapes: " + str(self.numberBunches)
+        bunches = "Bunches of grapes seen: " + str(self.numberBunches)
+        sm = "Small bunches: " + str(self.small)
+        me = "Medium bunches: " + str(self.medium)
+        bi = "Potential double bunches: " + str(self.big)
+        bunchesApproxN = self.numberBunches + int(self.big/2)
+        bunchesApprox = "Approximate number of grape bunches: " + str(bunchesApproxN)
+        weightBunch = self.weight * self.noGrapes
+        weightBunchRow = "Weight per row: " + str(round((weightBunch * bunchesApproxN) / 1000, 2)) + " kg"
+        weightField = "Total weight for field: " + str(round((weightBunch * bunchesApproxN * self.rows)/1000, 2)) + " kg"
+        bunchField = "Bunches within field: " + str(bunchesApproxN * self.rows)
+        grapesField = "Total grapes in field: " + str(bunchesApproxN * self.rows * self.noGrapes)
+        weightGrape = "Weight per grape: " + str(self.weight) + " grammes"
+        rowsField = "Rows of grapes in field: " + str(self.rows)
+
         state = "Control state: " + str(self.state)
         if str(self.state) != "Finished":
             self.end = time.time()
@@ -178,7 +211,7 @@ class Display:
                 w = abs(widths1 - widths2)
             gWidth1 = "Grapevine length: " + str(round(w , 2)) + " m"
  
-            bunchMetre = "Average bunches per metre: " + str(round(self.numberBunches / (w), 1))
+            bunchMetre = "Average bunches per metre: " + str(round(self.numberBunches / w, 1))
         except:
             gWidth1 = "Grapevine length: 0 m"
             avgWidth = 0
@@ -198,9 +231,20 @@ class Display:
 
         cv2.putText(self.img, bunches, (10,235), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, gWidth1, (10,250), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, sm, (10,280), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, me, (10,295), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, bi, (10,310), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
 
-        cv2.putText(self.img, bunchMetre, (10,280), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
-        cv2.putText(self.img, timing, (10,315), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, bunchesApprox, (10,345), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, bunchMetre, (10,360), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+
+        cv2.putText(self.img, bunchField, (10,395), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, grapesField, (10,410), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, weightField, (10,425), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, weightBunchRow, (10,440), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, weightGrape, (10,455), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, rowsField, (10,470), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, timing, (10,505), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
 
 
     #############
@@ -269,7 +313,15 @@ class Display:
 def main():
 
     rospy.init_node('main_display')
-    display = Display()
+    try:
+        rows = float(rospy.get_param('~rows'))
+        noGrapes = int(rospy.get_param('~grapes'))
+        weight = float(rospy.get_param('~weight'))
+    except:
+        rows = 1 
+        noGrapes = 50
+        weight = 0.18
+    display = Display(rows,noGrapes,weight)
     while not rospy.is_shutdown():
         display.addText()
         display.drawScreen()
