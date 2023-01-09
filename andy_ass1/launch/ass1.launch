@@ -49,8 +49,8 @@
         <node pkg="andy_ass1" name="main_display" type="main_display.py" >
                 <!-- How many rows of grapevines in field - 5 is a default-->
                 <param name="rows" value="5" type="string" />
-                <!-- How much a grape weighs 2g default-->
-                <param name="weight" value="2.0" type="string" />
+                <!-- How much a grape weighs 7g default-->
+                <param name="weight" value="7.0" type="string" />
                 <!-- number of grapes per bunch - depends on type of grape -->
                 <param name="grapes" value="70" type="string" />
         </node>

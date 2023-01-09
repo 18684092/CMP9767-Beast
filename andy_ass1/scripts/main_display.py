@@ -179,11 +179,12 @@ class Display:
         camera = "Camera state: " + str(self.camera)
         bunches = "Bunches of grapes seen (ignoring double bunches): " + str(self.numberBunches)
         sm = "Small bunches seen (partly occluded): " + str(self.small)
-        me = "Medium bunches (presume who bunch is seen): " + str(self.medium)
+        me = "Medium bunches (presume whole bunch is seen): " + str(self.medium)
         bi = "Potential double bunches (presume two overlap): " + str(self.big)
         bunchesApproxN = self.numberBunches + int(self.big/2)
         bunchesApprox = "Approximate number of grape bunches inferred: " + str(bunchesApproxN)
         weightBunch = self.weight * self.noGrapes
+        weightPerBunch = "Weight per bunch: " + str(round(weightBunch / 1000, 2)) + " kg" 
         weightBunchRow = "Weight per row: " + str(round((weightBunch * bunchesApproxN) / 1000, 2)) + " kg"
         weightField = "Total weight for field: " + str(round((weightBunch * bunchesApproxN * self.rows)/1000, 2)) + " kg"
         bunchField = "Bunches within field: " + str(int(bunchesApproxN * self.rows))
@@ -245,7 +246,8 @@ class Display:
         cv2.putText(self.img, weightGrape, (10,455), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, rowsField, (10,470), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, bunchSize, (10,485), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
-        cv2.putText(self.img, timing, (10,520), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, weightPerBunch, (10,500), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, timing, (10,535), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
 
 
     #############
