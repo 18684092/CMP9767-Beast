@@ -177,20 +177,20 @@ class Display:
         target = "Topological goal: " + str(self.target)
         moving = "Robot moving: " + str(self.moving)
         camera = "Camera state: " + str(self.camera)
-        bunches = "Bunches of grapes seen: " + str(self.numberBunches)
-        sm = "Small bunches: " + str(self.small)
-        me = "Medium bunches: " + str(self.medium)
-        bi = "Potential double bunches: " + str(self.big)
+        bunches = "Bunches of grapes seen (ignoring double bunches): " + str(self.numberBunches)
+        sm = "Small bunches seen (partly occluded): " + str(self.small)
+        me = "Medium bunches (presume who bunch is seen): " + str(self.medium)
+        bi = "Potential double bunches (presume two overlap): " + str(self.big)
         bunchesApproxN = self.numberBunches + int(self.big/2)
-        bunchesApprox = "Approximate number of grape bunches: " + str(bunchesApproxN)
+        bunchesApprox = "Approximate number of grape bunches inferred: " + str(bunchesApproxN)
         weightBunch = self.weight * self.noGrapes
         weightBunchRow = "Weight per row: " + str(round((weightBunch * bunchesApproxN) / 1000, 2)) + " kg"
         weightField = "Total weight for field: " + str(round((weightBunch * bunchesApproxN * self.rows)/1000, 2)) + " kg"
-        bunchField = "Bunches within field: " + str(bunchesApproxN * self.rows)
-        grapesField = "Total grapes in field: " + str(bunchesApproxN * self.rows * self.noGrapes)
+        bunchField = "Bunches within field: " + str(int(bunchesApproxN * self.rows))
+        grapesField = "Total grapes in field: " + str(int(bunchesApproxN * self.rows * self.noGrapes))
         weightGrape = "Weight per grape: " + str(self.weight) + " grammes"
-        rowsField = "Rows of grapes in field: " + str(self.rows)
-
+        rowsField = "Rows of grapes in field: " + str(int(self.rows))
+        bunchSize = "Number of grapes per bunch: " + str(int(self.noGrapes))
         state = "Control state: " + str(self.state)
         if str(self.state) != "Finished":
             self.end = time.time()
@@ -244,7 +244,8 @@ class Display:
         cv2.putText(self.img, weightBunchRow, (10,440), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, weightGrape, (10,455), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, rowsField, (10,470), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
-        cv2.putText(self.img, timing, (10,505), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, bunchSize, (10,485), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
+        cv2.putText(self.img, timing, (10,520), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
 
 
     #############

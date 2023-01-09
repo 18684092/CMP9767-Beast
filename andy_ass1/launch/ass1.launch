@@ -52,7 +52,7 @@
                 <!-- How much a grape weighs 2g default-->
                 <param name="weight" value="2.0" type="string" />
                 <!-- number of grapes per bunch - depends on type of grape -->
-                <param name="grapes" value="50" type="string" />
+                <param name="grapes" value="70" type="string" />
         </node>
         <!-- 3 Camera nodes to detect grapes from each camera using one script called multiple times
         passing parameters to select which camera to use -->
