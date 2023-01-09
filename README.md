@@ -8,6 +8,8 @@ This solution uses a pre-made map of the environment along with a topological ma
 
 ## Running The Simulation
 
+- Install docker and the image as per [CMP9767 Wiki Page](https://github.com/LCAS/CMP9767M/wiki/using-the-module-resources-in-docker).
+- run `docker-compose up`
 - roslaunch andy_ass1 ass1.launch
 
 ## Individual Components and Algorithms Used
