@@ -45,7 +45,7 @@
                 <param name="distance" value="1.25" type="string" />
         </node> -->
 
-        <!-- Information display -->
+        <!-- Information display and final calculations -->
         <node pkg="andy_ass1" name="main_display" type="main_display.py" >
                 <!-- How many rows of grapevines in field - 5 is a default-->
                 <param name="rows" value="5" type="string" />
@@ -74,7 +74,7 @@
         <!-- Node to collate grape bunches as a point cloud with intensity showing bunch size -->
         <node pkg="andy_ass1" name="point_colation" type="point_colation.py"  /> 
 
-        <!-- Navigate to grapevine -->
+        <!-- Navigate to grapevine and also localisation -->
         <node pkg="andy_ass1" name="go_grapevine" type="go_grapevine.py" >
                 <!-- groups bunches of grapes (presume same bunch) if they are within x metres of each other - default 0.2--> 
                 <param name="tolerance" value="0.2" type="string" />
