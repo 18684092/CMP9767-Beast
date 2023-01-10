@@ -15,7 +15,8 @@ This solution uses a pre-made map of the environment along with a topological ma
 - Change directory to `/home/ubuntu/ros_ws/src`
 - Issue command `git clone https://github.com/18684092/CMP9767-Beast.git .` to clone the repositiory
 - Issue command `git clone https://github.com/LCAS/CMP9767M.git` to clone the CMP9767 module repository
--  
+- Issue command ` sudo apt-get update && sudo apt-get install ros-noetic-opencv-apps` to install OpenCV
+- Issue command `sudo apt-get install ros-noetic-mongodb-store ros-noetic-rospy-message-converter`
 - roslaunch andy_ass1 ass1.launch
 
 ## Individual Components and Algorithms Used
