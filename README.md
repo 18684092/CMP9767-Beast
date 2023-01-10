@@ -9,19 +9,20 @@ This solution uses a pre-made map of the environment along with a topological ma
 ## Running The Simulation
 
 - Install docker and the image as per [CMP9767 Wiki Page](https://github.com/LCAS/CMP9767M/wiki/using-the-module-resources-in-docker)
+- Highly recommended to change the `RESOLUTION` line to `RESOLUTION: 1920x1080` within docker-compose.yaml that the previous setup created
 - run `docker-compose up`
 - The simulation and files are now available via a browser at http:://localhost:6080 (virtual desktop) and http://localhost:6081 (open source MS Visual Code)
 - Create a catkin workspace as per the [ROS Wiki](http://wiki.ros.org/catkin/Tutorials/create_a_workspace) - **Note** Make sure the top level folder is ros_ws/ and not catkin_ws/
 - Change directory to `/home/ubuntu/ros_ws/src`
 - Issue command `git clone https://github.com/18684092/CMP9767-Beast.git .` to clone the repositiory
 - Issue command `git clone https://github.com/LCAS/CMP9767M.git` to clone the CMP9767 module repository
-- Issue command ` sudo apt-get update && sudo apt-get install ros-noetic-opencv-apps` to install OpenCV
+- Issue command `sudo apt-get update && sudo apt-get install ros-noetic-opencv-apps` to install OpenCV
 - Issue command `sudo apt-get install ros-noetic-mongodb-store ros-noetic-rospy-message-converter`
 - Issue command `sudo apt-get install ros-noetic-gmapping` to install mapping
 - Issue command `sudo apt-get install ros-noetic-key-teleop`
 - Issue command `sudo apt-get install ros-noetic-topological-rviz-tools`
 - Launch a new terminal window or terminal tab (this executes .bashrc and newly install files can be found)
-- Issue command `/home/ubuntu/ros_ws/`
+- Issue command `cd /home/ubuntu/ros_ws/`
 - Issue command `catkin_make`
 - Issue command `source devel/setup.bash`
 - Issue command `roslaunch andy_ass1 ass1.launch`
