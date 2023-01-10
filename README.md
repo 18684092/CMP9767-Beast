@@ -18,6 +18,8 @@ This solution uses a pre-made map of the environment along with a topological ma
 - Issue command ` sudo apt-get update && sudo apt-get install ros-noetic-opencv-apps` to install OpenCV
 - Issue command `sudo apt-get install ros-noetic-mongodb-store ros-noetic-rospy-message-converter`
 - Issue command `sudo apt-get install ros-noetic-gmapping` to install mapping
+- Issue command `sudo apt-get install ros-noetic-key-teleop`
+- Issue command `apt-get install ros-noetic-topological-rviz-tools`
 - roslaunch andy_ass1 ass1.launch
 
 ## Individual Components and Algorithms Used
