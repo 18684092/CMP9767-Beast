@@ -20,11 +20,11 @@ This solution uses a pre-made map of the environment along with a topological ma
 - Issue command `sudo apt-get install ros-noetic-gmapping` to install mapping
 - Issue command `sudo apt-get install ros-noetic-key-teleop`
 - Issue command `sudo apt-get install ros-noetic-topological-rviz-tools`
-- Launch a new terminal window
+- Launch a new terminal window or terminal tab (this executes .bashrc and newly install files can be found)
 - Issue command `/home/ubuntu/ros_ws/`
 - Issue command `catkin_make`
 - Issue command `source devel/setup.bash`
-- roslaunch andy_ass1 ass1.launch
+- Issue command `roslaunch andy_ass1 ass1.launch`
 
 ## Individual Components and Algorithms Used
 
