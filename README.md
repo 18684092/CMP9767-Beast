@@ -19,7 +19,11 @@ This solution uses a pre-made map of the environment along with a topological ma
 - Issue command `sudo apt-get install ros-noetic-mongodb-store ros-noetic-rospy-message-converter`
 - Issue command `sudo apt-get install ros-noetic-gmapping` to install mapping
 - Issue command `sudo apt-get install ros-noetic-key-teleop`
-- Issue command `apt-get install ros-noetic-topological-rviz-tools`
+- Issue command `sudo apt-get install ros-noetic-topological-rviz-tools`
+- Launch a new terminal window
+- Issue command `/home/ubuntu/ros_ws/`
+- Issue command `catkin_make`
+- Issue command `source devel/setup.bash`
 - roslaunch andy_ass1 ass1.launch
 
 ## Individual Components and Algorithms Used
