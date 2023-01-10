@@ -161,7 +161,6 @@ include_directories(
  catkin_install_python(PROGRAMS
    scripts/object_distance.py
    scripts/open_move.py
-   scripts/control.py
    scripts/object_distance_tf.py
    scripts/main_display.py
    scripts/camera.py
