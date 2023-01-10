@@ -8,8 +8,16 @@ project(andy_ass1)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  geometry_msgs
+  nav_msgs
   rospy
+  rostest
   std_msgs
+  topological_navigation
+  uol_cmp9767m_base
+  roscpp
+  rospy
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
