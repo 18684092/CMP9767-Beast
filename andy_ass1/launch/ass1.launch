@@ -62,9 +62,10 @@
         passing parameters to select which camera to use -->
         <node pkg="andy_ass1" name="cameraLeft" type="camera.py">
                 <param name="camera" value="left" type="string" /> 
-                <!-- contour area for a valid bunch 100 is default (50 to 450) -->
+                <!-- contour area for a valid bunch 100 is default (50 to 450) --> 
                 <param name="area" value="100" type="string" />
-        </node>
+        </node> 
+        
         <!--
         <node pkg="andy_ass1" name="cameraRight" type="camera.py">  
                 <param name="camera" value="right" type="string" />

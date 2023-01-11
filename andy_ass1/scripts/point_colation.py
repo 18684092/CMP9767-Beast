@@ -88,40 +88,49 @@ class Collate:
     ##################
     def collate_points(self, pc):
         ''' Each point cloud will get collated together into one array of dictionaries '''
+        
         for point,channel in zip(pc.points, pc.channels):
+        
             # Is point within x cm of stored 3D point?
             x = point.x
             y = point.y
             z = point.z 
             inten = channel.values[0]
             found = False
+
+            # Accept the point if it is above ground
             if z > 0.05:
                 for i, pointDict in enumerate(self.bunches):
                     sX = pointDict['x']
                     sY = pointDict['y']
                     sZ = pointDict['z']
                     sN = pointDict['n']
+
                     # Different between this point and a previously seen point
                     dX = abs(abs(sX) - abs(x))
                     dY = abs(abs(sY) - abs(y))
                     dZ = abs(abs(sZ) - abs(z))
+                    
                     # Crude filter to group noisy point clouds - not effective really
                     if dX < self.tol and dY < self.tol and dZ < self.tol:
+                        
                         # Multiple points that match suggest a better reading
                         self.bunches[i]['n'] += 1
+                        
                         # If this point is close enough to where another point is
                         # update the intensity value if bigger 
                         if self.bunches[i]['i'] < inten:
                            self.bunches[i]['i'] = inten 
                         found = True
+                
                 if not found:
                     # Add this new point
                     self.bunches.append({'x':x, 'y':y, 'z':z, 'n':1, 'i':inten })
+        
         # Sorting them just in case we only want to publish the first or biggest x number of bunches
         self.bunches = sorted(self.bunches, key=itemgetter('n', 'i'), reverse=True)
         print(self.bunches)
         print()
-
 
 ########
 # main #
