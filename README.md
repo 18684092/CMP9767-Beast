@@ -38,3 +38,4 @@ This solution uses a pre-made map of the environment along with a topological ma
 - **Image**, **CameraInfo**, **OpenCV**, **FindContours**, **Moments**, **ContourArea**, **projectPixelTo3dRay**, **Image Scaling** and **tf_listener** implemented within script **camera.py**. This script detects grapebunches, saves images and publishes pointclouds of bunch positions. and takes launch file parameters to configure which camera will be used using **rospy.get_param()**.
 - **OpenCV** image creation in the form of a display screen within script **main_display.py**. This script feedsback to the user what is going on and final results. 
 
+![](https://github.com/18684092/CMP9767-Beast/blob/Beast-Nodes/andy_ass1/images/Screenshot%20from%202023-01-11%2023-15-46.png)
