@@ -112,10 +112,13 @@ class Display:
     # Bunches #
     ###########
     def grapes_callback(self, pc):
+        # How many bunches of each size have been seen
         self.numberBunches = len(pc.points)
         self.small = 0
         self.big = 0
         self.medium = 0
+
+        # These are values worked out by trial and error
         try:
             for v in pc.channels[0].values:
                 if v > 4500:
@@ -248,7 +251,6 @@ class Display:
         cv2.putText(self.img, bunchSize, (10,485), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, weightPerBunch, (10,500), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
         cv2.putText(self.img, timing, (10,535), self.font, self.fontScale, self.fontColor, self.thickness, self.lineType)
-
 
     #############
     # kmToMiles # 
